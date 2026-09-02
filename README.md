@@ -10,13 +10,25 @@
 
 ## Caso del proyecto
 
-(Por asignar)
+**Caso 2: Problema del camino mínimo**
+
+Desarrolle un programa que resuelva el problema del camino mínimo en un grafo ponderado.
+
+El programa deberá solicitar al usuario el número de vértices 𝑛, con _5 ≤ 𝑛 ≤ 15_, y ofrecer dos opciones para construir la matriz de adyacencia ponderada de tamaño 𝑛 × 𝑛:
+
+- Generación automática: crear aleatoriamente una matriz cuyos elementos
+sean pesos no negativos, representando las aristas del grafo.
+- Ingreso manual: permitir que el usuario introduzca los pesos de la matriz.
+
+Una vez construida la matriz, el programa deberá generar y mostrar el grafo ponderado correspondiente.
+
+Posteriormente, el usuario seleccionará un vértice de origen y un vértice de destino, y el programa determinará el camino mínimo entre ambos, indicando la secuencia de vértices que lo conforman, el costo total del recorrido y el desarrollo paso a paso del algoritmo empleado para obtener la
+solución.
 
 ## Ensayo escrito
 
-```
-(Colocar link del Docs)
-```
+
+https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/edit?usp=sharing
 
 ## Presentación
 
