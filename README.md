@@ -27,7 +27,6 @@ solución.
 
 ## Ensayo escrito
 
-
 https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/edit?usp=sharing
 
 ## Presentación
@@ -36,12 +35,34 @@ https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/
 (Colocar link del Canva)
 ```
 
-## Aportes de cada integrante
+## Estructura del proyecto
 
-| Integrante | Contribuciones |
-| ---------- | :--------------: |
-| Luis Enrique Sedano Barreda | 1 |
-| Carlos Orlando Horna Cueva | 2 |
-| Angela Bibiana Cóndor Velásquez | 3 |
-| Johan Micael Quispe Laura | 4 |
-| Adrian Alejandro Leon Ojeda | 5 |
+```text
+├── .gitignore             # Archivos ignorados por Git (pycache y .vscode)
+├── dibujarGrafo.py        # Visualización del grafo
+├── Grafo.py               # Implementación de la clase Grafo
+├── main.py                # Ejecutable principal
+├── README.md              # Resumen del proyecto, archivos y documentación
+└── requirements.txt       # Dependencias del proyecto
+```
+
+## Requisitos
+
+Este proyecto está desarrollado para ejecutarse localmente con:
+
+- Python 3.11
+
+### Dependencias principales
+
+| Librería | Versión recomendada | Uso dentro del proyecto |
+| --- | --- | --- |
+| `networkx` | `>= 3.4.2` | Modelización del grafo |
+| `matplotlib` | `>= 3.10.0` | Visualización del grafo |
+
+### Instalación local
+
+Puedes instalar las dependencias usando el archivo `requirements.txt` en la terminal:
+
+```bash
+pip install -r requirements.txt
+```
