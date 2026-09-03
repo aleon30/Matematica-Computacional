@@ -1,6 +1,13 @@
 from Grafo import Grafo
 
-num_vertices = int(input("Ingrese el número de vértices: "))
+# Pedimos el numero de vertices hasta que sea una cantidad permitida
+while True:
+    num_vertices = int(input("Ingrese el número de vértices (entre 5 y 15): "))
+    
+    if 5 <= num_vertices <= 15:
+        break  # Si el número es correcto, se sale de la repeticion
+    else:
+        print("Cantidad no permitida. Por favor, ingrese un valor entre 5 y 15.")
 
 grafo = Grafo(num_vertices)
 
