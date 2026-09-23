@@ -1,7 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def dibujar(aristas):
+def dibujar(aristas, recorrido_minimo):
+    fig = plt.figure("Grafo")
     # Inicialización del grafo
     grafo = nx.Graph()
     # Agregamos las aritas al grafo
@@ -16,7 +17,19 @@ def dibujar(aristas):
             node_size=1000)
     # Obtenemos los pesos de las aristas y los dibujamos
     texto_aristas = nx.get_edge_attributes(grafo, 'weight')
+    # Cambiamos el color de las aristas que conforman el camino minimo
+    aristas_recorrido_minimo = []
+    if recorrido_minimo != [-1]:
+        for i in range(len(recorrido_minimo)-1):
+            aristas_recorrido_minimo.append((recorrido_minimo[i], recorrido_minimo[i+1]))
+
+    nx.draw_networkx_edges(grafo, 
+                           posicion, 
+                           edgelist=aristas_recorrido_minimo, 
+                           width=4,  
+                           edge_color="red")
     # Dibujamos las etiquetas de las aristas con sus pesos
     nx.draw_networkx_edge_labels(grafo, posicion, edge_labels=texto_aristas)
+    fig.canvas.manager.set_window_title("Grafo y Camino mínimo")
     # Mostramos el grafo
     plt.show()

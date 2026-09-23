@@ -56,5 +56,11 @@ elif opcion == '2':
             if peso > 0:
                 grafo.agregar_arista(i, j, peso)
 
+print("Ingrese 2 nodos: ")
+inicio = int(input("Ingrese el nodo de inicio: "))
+fin = int(input("Ingrese el nodo final: "))
+
+grafo.camino_minimo(inicio, fin)
+print("Camino mínimo:", grafo.recorrido_minimo)
 print("\nProyectando la representación visual del grafo ponderado...")
 grafo.dibujar_grafo()
