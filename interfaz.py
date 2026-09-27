@@ -13,6 +13,7 @@ class AplicacionGrafo:
         self.root.configure(bg="#FFFFFF")
         
         self.grafo_actual = None
+        self.paso_animacion_actual = 0  # Inicialización de la variable de estado
         
         self.estilo = ttk.Style()
         self.estilo.theme_use('clam')
@@ -43,23 +44,141 @@ class AplicacionGrafo:
         self.estilo.configure('TRadiobutton', background=COLOR_FONDO, foreground=COLOR_TEXTO, font=FUENTE_BASE)
         self.estilo.map('TRadiobutton', background=[('active', COLOR_FONDO)])
         
+        self.estilo.configure('TNotebook', background=COLOR_FONDO, borderwidth=0)
+        self.estilo.configure('TNotebook.Tab', background="#E2E8F0", foreground=COLOR_TEXTO, padding=[10, 5], font=FUENTE_BASE)
+        self.estilo.map('TNotebook.Tab', background=[('selected', COLOR_PRIMARIO)], foreground=[('selected', COLOR_FONDO)])
+        
         self.panel_principal = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, bg=COLOR_FONDO, borderwidth=0)
         self.panel_principal.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         self.frame_controles = ttk.Frame(self.panel_principal, padding="20 10 30 10")
         self.panel_principal.add(self.frame_controles, minsize=380, stretch="never")
         
-        self.frame_grafico = ttk.Frame(self.panel_principal, padding="10")
-        self.panel_principal.add(self.frame_grafico, minsize=500, stretch="always")
+        self.notebook_central = ttk.Notebook(self.panel_principal)
+        self.panel_principal.add(self.notebook_central, minsize=500, stretch="always")
+        
+        self.frame_grafico = ttk.Frame(self.notebook_central, padding="10")
+        self.notebook_central.add(self.frame_grafico, text="Grafo Visual")
+        
+        self.frame_matriz = ttk.Frame(self.notebook_central, padding="10")
+        self.notebook_central.add(self.frame_matriz, text="Matriz de Adyacencia")
+        
+        # Creación de controles de reproducción (permanecen ocultos en la inicialización)
+        self.crear_controles_reproduccion()
+        
+        # Sub-contenedor exclusivo para el canvas para evitar que eliminar widgets afecte a los botones
+        self.frame_canvas_grafo = ttk.Frame(self.frame_grafico)
+        self.frame_canvas_grafo.pack(side="top", fill="both", expand=True)
         
         self.crear_controles()
         self.crear_estado_vacio()
+        self.crear_vista_matriz()
+
+    def crear_controles_reproduccion(self):
+        self.frame_reproduccion = ttk.Frame(self.frame_grafico)
         
+        self.label_explicacion_paso = ttk.Label(self.frame_reproduccion, text="", font=("Helvetica", 11, "italic"), anchor="center")
+        self.label_explicacion_paso.pack(fill="x", pady=(0, 10))
+        
+        frame_botones = ttk.Frame(self.frame_reproduccion)
+        frame_botones.pack(anchor="center")
+        
+        self.btn_inicio = ttk.Button(frame_botones, text="[<<] Inicio", style='Secundario.TButton', command=self.ir_inicio)
+        self.btn_inicio.pack(side="left", padx=5)
+        
+        self.btn_anterior = ttk.Button(frame_botones, text="[<] Anterior", style='Secundario.TButton', command=self.ir_paso_anterior)
+        self.btn_anterior.pack(side="left", padx=5)
+        
+        self.btn_siguiente = ttk.Button(frame_botones, text="[>] Siguiente", style='Secundario.TButton', command=self.ir_paso_siguiente)
+        self.btn_siguiente.pack(side="left", padx=5)
+        
+        self.btn_fin = ttk.Button(frame_botones, text="[>>] Fin", style='Secundario.TButton', command=self.ir_fin)
+        self.btn_fin.pack(side="left", padx=5)
+
+    def mostrar_reproduccion(self):
+        self.frame_canvas_grafo.pack_forget()
+        self.frame_reproduccion.pack(side="bottom", fill="x", pady=(10, 0))
+        self.frame_canvas_grafo.pack(side="top", fill="both", expand=True)
+
+    def ocultar_reproduccion(self):
+        if self.frame_reproduccion.winfo_ismapped():
+            self.frame_reproduccion.pack_forget()
+
     def crear_estado_vacio(self):
-        # Mensaje sutil para rellenar el espacio vacio inicial
-        self.label_vacio = ttk.Label(self.frame_grafico, text="El grafo visualizado aparecera aqui", font=("Helvetica", 12), foreground="#7A7A7A")
-        self.label_vacio.place(relx=0.5, rely=0.5, anchor="center")
+        # El texto vacío ahora se vincula al sub-contenedor del canvas
+        self.label_vacio_grafo = ttk.Label(self.frame_canvas_grafo, text="El grafo visualizado aparecera aqui", font=("Helvetica", 12), foreground="#7A7A7A")
+        self.label_vacio_grafo.place(relx=0.5, rely=0.5, anchor="center")
+
+    def crear_vista_matriz(self):
+        self.frame_opciones_matriz = ttk.Frame(self.frame_matriz)
         
+        ttk.Label(self.frame_opciones_matriz, text="Tipo de Vista:", style='Titulo.TLabel').pack(side="left", padx=(0, 15))
+        
+        self.tipo_matriz_var = tk.StringVar(value="pesos")
+        
+        ttk.Radiobutton(self.frame_opciones_matriz, text="Pesos", variable=self.tipo_matriz_var, value="pesos", command=self.actualizar_vista_matriz).pack(side="left", padx=(0, 10))
+        ttk.Radiobutton(self.frame_opciones_matriz, text="Caminos Directos", variable=self.tipo_matriz_var, value="directos", command=self.actualizar_vista_matriz).pack(side="left", padx=(0, 10))
+        ttk.Radiobutton(self.frame_opciones_matriz, text="Accesibilidad", variable=self.tipo_matriz_var, value="accesibilidad", command=self.actualizar_vista_matriz).pack(side="left")
+
+        self.label_vacio_matriz = ttk.Label(self.frame_matriz, text="Genere un grafo para visualizar la matriz de adyacencia", font=("Helvetica", 12), foreground="#7A7A7A")
+        self.label_vacio_matriz.place(relx=0.5, rely=0.5, anchor="center")
+        
+        self.frame_tree = ttk.Frame(self.frame_matriz)
+        self.scroll_y_matriz = ttk.Scrollbar(self.frame_tree, orient="vertical")
+        self.scroll_y_matriz.pack(side="right", fill="y")
+        self.scroll_x_matriz = ttk.Scrollbar(self.frame_tree, orient="horizontal")
+        self.scroll_x_matriz.pack(side="bottom", fill="x")
+        self.tree_matriz = ttk.Treeview(self.frame_tree, show="headings", yscrollcommand=self.scroll_y_matriz.set, xscrollcommand=self.scroll_x_matriz.set)
+        self.scroll_y_matriz.config(command=self.tree_matriz.yview)
+        self.scroll_x_matriz.config(command=self.tree_matriz.xview)
+        self.tree_matriz.pack(side="left", fill="both", expand=True)
+
+    def actualizar_vista_matriz(self):
+        if self.grafo_actual is None:
+            return
+            
+        if self.label_vacio_matriz.winfo_exists():
+            self.label_vacio_matriz.place_forget()
+            
+        self.frame_opciones_matriz.pack(side="top", fill="x", pady=(0, 10))
+        self.frame_tree.pack(fill="both", expand=True)
+        
+        for item in self.tree_matriz.get_children():
+            self.tree_matriz.delete(item)
+            
+        n = self.grafo_actual.V
+        columnas = ["Origen"] + [f"Destino {i}" for i in range(n)]
+        self.tree_matriz["columns"] = columnas
+        self.tree_matriz.heading("Origen", text="Origen \\ Destino")
+        self.tree_matriz.column("Origen", width=120, anchor="center", stretch=False)
+        
+        for i in range(n):
+            col_name = f"Destino {i}"
+            self.tree_matriz.heading(col_name, text=str(i))
+            self.tree_matriz.column(col_name, width=65, anchor="center", stretch=True)
+            
+        tipo_vista = self.tipo_matriz_var.get()
+        
+        if tipo_vista == "pesos":
+            matriz = self.grafo_actual.matriz_pesos()
+        elif tipo_vista == "directos":
+            matriz = self.grafo_actual.matriz_caminos_directos()
+        else:
+            matriz = self.grafo_actual.matriz_accesibilidad()
+
+        for i in range(n):
+            fila = [f"{i}"]
+            for j in range(n):
+                valor = matriz[i][j]
+                if tipo_vista == "pesos":
+                    if valor == 9999999:
+                        fila.append("-") 
+                    else:
+                        fila.append(str(valor))
+                else:
+                    fila.append(str(valor))
+            self.tree_matriz.insert("", "end", values=fila)
+
     def crear_controles(self):
         ttk.Label(self.frame_controles, text="Configuracion del Grafo", style='Titulo.TLabel').pack(anchor="w", pady=(0, 15))
         
@@ -110,11 +229,30 @@ class AplicacionGrafo:
         self.scroll_texto = ttk.Scrollbar(self.frame_texto)
         self.scroll_texto.pack(side="right", fill="y")
         
-        self.texto_pasos = tk.Text(self.frame_texto, height=8, width=30, yscrollcommand=self.scroll_texto.set, state="disabled", 
-                                   font=("Consolas", 9), bg="#F8FAFC", fg="#475569", relief="flat", highlightthickness=1, highlightbackground="#E2E8F0")
-        self.texto_pasos.pack(side="left", fill="both", expand=True)
-        self.scroll_texto.config(command=self.texto_pasos.yview)
+        columnas = ("Paso", "Nodo", "Vecino", "Cálculo", "Decisión")
+        self.tabla_pasos = ttk.Treeview(self.frame_texto, columns=columnas, show="headings", yscrollcommand=self.scroll_texto.set, height=8)
+        self.tabla_pasos.pack(side="left", fill="both", expand=True)
+        self.scroll_texto.config(command=self.tabla_pasos.yview)
         
+        self.tabla_pasos.heading("Paso", text="Paso")
+        self.tabla_pasos.column("Paso", width=40, anchor="center")
+        
+        self.tabla_pasos.heading("Nodo", text="Nodo")
+        self.tabla_pasos.column("Nodo", width=50, anchor="center")
+        
+        self.tabla_pasos.heading("Vecino", text="Vecino")
+        self.tabla_pasos.column("Vecino", width=50, anchor="center")
+        
+        self.tabla_pasos.heading("Cálculo", text="Cálculo")
+        self.tabla_pasos.column("Cálculo", width=120, anchor="center")
+        
+        self.tabla_pasos.heading("Decisión", text="Decisión")
+        self.tabla_pasos.column("Decisión", width=90, anchor="center")
+        
+        self.tabla_pasos.tag_configure('actualiza', foreground='#15803D')
+        self.tabla_pasos.tag_configure('descarta', foreground='#94A3B8')
+        self.tabla_pasos.tag_configure('visita', foreground='#1E3A8A', font=('Helvetica', 9, 'bold'))
+
     def evento_generar_grafo(self):
         try:
             num_vertices = int(self.entry_vertices.get())
@@ -128,6 +266,8 @@ class AplicacionGrafo:
         self.grafo_actual = Grafo(num_vertices)
         metodo = self.opcion_generacion.get()
         
+        self.ocultar_reproduccion()
+        
         if metodo == "auto":
             for i in range(num_vertices):
                 for j in range(i + 1, num_vertices):
@@ -137,7 +277,9 @@ class AplicacionGrafo:
                         
             self.label_resultado.config(text="Estado: Grafo generado automaticamente.", style='Exito.TLabel')
             self.limpiar_paso_a_paso()
-            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_grafico)
+            # Ahora la gráfica se inserta sobre el frame_canvas_grafo
+            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_canvas_grafo)
+            self.actualizar_vista_matriz()
             
         elif metodo == "manual":
             self.abrir_ventana_manual(num_vertices)
@@ -174,6 +316,7 @@ class AplicacionGrafo:
                 entradas_pesos[(i, j)] = entry
                 
         def guardar_pesos():
+            self.ocultar_reproduccion()
             for (i, j), entry in entradas_pesos.items():
                 try:
                     peso = int(entry.get())
@@ -186,7 +329,8 @@ class AplicacionGrafo:
             ventana_manual.destroy()
             self.label_resultado.config(text="Estado: Grafo manual generado exitosamente.", style='Exito.TLabel')
             self.limpiar_paso_a_paso()
-            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_grafico)
+            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_canvas_grafo)
+            self.actualizar_vista_matriz()
             
         ttk.Button(frame_interior, text="Guardar y Visualizar", style='Primario.TButton', command=guardar_pesos).pack(pady=30)
 
@@ -209,6 +353,10 @@ class AplicacionGrafo:
             
         self.grafo_actual.camino_minimo(inicio, fin)
         
+        # Reiniciar el contador al inicio y desplegar la botonera de reproducción
+        self.paso_animacion_actual = 0
+        self.mostrar_reproduccion()
+        
         if self.grafo_actual.recorrido_minimo == [-1]:
             texto_res = "Resultado: No existe un camino posible."
             self.label_resultado.config(text=texto_res, foreground="#0A0A0A")
@@ -216,8 +364,15 @@ class AplicacionGrafo:
             texto_res = f"Ruta: {self.grafo_actual.recorrido_minimo}\nCosto Total: {self.grafo_actual.costo_total}"
             self.label_resultado.config(text=texto_res, style='Exito.TLabel')
             
-        self.mostrar_paso_a_paso(self.grafo_actual.historial_pasos)
-        dibujar_en_canvas(self.grafo_actual.aristas, self.grafo_actual.recorrido_minimo, self.frame_grafico)
+        # Cargar el registro completo en el cuadro de texto lateral
+        texto_historial = ""
+        for paso in self.grafo_actual.historial_pasos:
+            texto_historial += paso.get('mensaje', '') + "\n"
+            
+        self.mostrar_paso_a_paso(texto_historial)
+        
+        # En lugar de dibujar el resultado final directamente, se renderiza el fotograma inicial (paso 0)
+        self.renderizar_paso_actual()
 
     def mostrar_paso_a_paso(self, texto):
         self.texto_pasos.config(state="normal")
@@ -226,9 +381,99 @@ class AplicacionGrafo:
         self.texto_pasos.config(state="disabled")
 
     def limpiar_paso_a_paso(self):
-        self.texto_pasos.config(state="normal")
-        self.texto_pasos.delete(1.0, tk.END)
-        self.texto_pasos.config(state="disabled")
+        self.tabla_pasos.delete(*self.tabla_pasos.get_children())
+
+    def renderizar_paso_actual(self):
+        if not self.grafo_actual or not self.grafo_actual.historial_pasos:
+            return
+            
+        paso_actual = self.grafo_actual.historial_pasos[self.paso_animacion_actual]
+        self.label_explicacion_paso.config(text=paso_actual.get('mensaje', ''))
+        
+        # Limpiar la tabla antes de rellenar el historial hasta el fotograma actual
+        self.limpiar_paso_a_paso()
+        
+        ultima_fila = None
+        
+        # Iterar e insertar filas desde el paso 0 hasta el paso_animacion_actual
+        for i in range(self.paso_animacion_actual + 1):
+            p = self.grafo_actual.historial_pasos[i]
+            
+            if p['tipo'] == 'visitando':
+                valores = (i, p['nodo'], "-", f"Costo: {p['costo']}", "Visitando")
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
+                
+            elif p['tipo'] == 'evaluando':
+                # Preparar el texto de cálculo comparando el nuevo costo vs el ya conocido
+                costo_conocido = p.get('costo_conocido', 'INF')
+                if costo_conocido == 9999999:
+                    costo_conocido = "INF"
+                    
+                calculo_str = f"Nuevo: {p['nuevo_costo']} (vs {costo_conocido})"
+                decision = p['decision']
+                
+                tag = 'actualiza' if decision == 'Actualiza' else 'descarta'
+                valores = (i, p['nodo_actual'], p['vecino'], calculo_str, decision)
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=(tag,))
+                
+            elif p['tipo'] == 'destino_alcanzado':
+                valores = (i, p['nodo'], "-", "-", "Destino!")
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
+                
+        # Hacer scroll automático a la última fila insertada
+        if ultima_fila:
+            self.tabla_pasos.see(ultima_fila)
+            
+        # Renderizado visual del grafo para el fotograma actual
+        nodo_resaltado = None
+        arista_resaltada = None
+        recorrido_mostrar = []
+        
+        if paso_actual['tipo'] == 'visitando':
+            nodo_resaltado = paso_actual.get('nodo')
+        elif paso_actual['tipo'] == 'evaluando':
+            nodo_resaltado = paso_actual.get('nodo_actual')
+            arista_resaltada = (paso_actual.get('nodo_actual'), paso_actual.get('vecino'))
+        elif paso_actual['tipo'] == 'destino_alcanzado':
+            nodo_resaltado = paso_actual.get('nodo')
+            
+        es_ultimo_paso = (self.paso_animacion_actual == len(self.grafo_actual.historial_pasos) - 1)
+        if es_ultimo_paso:
+            recorrido_mostrar = self.grafo_actual.recorrido_minimo
+            
+        dibujar_en_canvas(
+            self.grafo_actual.aristas, 
+            recorrido_mostrar, 
+            self.frame_canvas_grafo, 
+            nodo_resaltado=nodo_resaltado, 
+            arista_resaltada=arista_resaltada
+        )
+
+    def ir_paso_siguiente(self):
+        if not self.grafo_actual or not self.grafo_actual.historial_pasos:
+            return
+        if self.paso_animacion_actual < len(self.grafo_actual.historial_pasos) - 1:
+            self.paso_animacion_actual += 1
+            self.renderizar_paso_actual()
+
+    def ir_paso_anterior(self):
+        if not self.grafo_actual or not self.grafo_actual.historial_pasos:
+            return
+        if self.paso_animacion_actual > 0:
+            self.paso_animacion_actual -= 1
+            self.renderizar_paso_actual()
+
+    def ir_inicio(self):
+        if not self.grafo_actual or not self.grafo_actual.historial_pasos:
+            return
+        self.paso_animacion_actual = 0
+        self.renderizar_paso_actual()
+
+    def ir_fin(self):
+        if not self.grafo_actual or not self.grafo_actual.historial_pasos:
+            return
+        self.paso_animacion_actual = len(self.grafo_actual.historial_pasos) - 1
+        self.renderizar_paso_actual()
 
 if __name__ == "__main__":
     root = tk.Tk()
