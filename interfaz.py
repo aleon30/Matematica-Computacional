@@ -364,21 +364,8 @@ class AplicacionGrafo:
             texto_res = f"Ruta: {self.grafo_actual.recorrido_minimo}\nCosto Total: {self.grafo_actual.costo_total}"
             self.label_resultado.config(text=texto_res, style='Exito.TLabel')
             
-        # Cargar el registro completo en el cuadro de texto lateral
-        texto_historial = ""
-        for paso in self.grafo_actual.historial_pasos:
-            texto_historial += paso.get('mensaje', '') + "\n"
-            
-        self.mostrar_paso_a_paso(texto_historial)
-        
-        # En lugar de dibujar el resultado final directamente, se renderiza el fotograma inicial (paso 0)
+        # Se renderiza el fotograma inicial en el gráfico y en la tabla de pasos
         self.renderizar_paso_actual()
-
-    def mostrar_paso_a_paso(self, texto):
-        self.texto_pasos.config(state="normal")
-        self.texto_pasos.delete(1.0, tk.END)
-        self.texto_pasos.insert(tk.END, texto)
-        self.texto_pasos.config(state="disabled")
 
     def limpiar_paso_a_paso(self):
         self.tabla_pasos.delete(*self.tabla_pasos.get_children())
