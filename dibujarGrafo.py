@@ -1,50 +1,79 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-def dibujar(aristas, recorrido_minimo):
-    fig = plt.figure("Grafo")
-    # Inicialización del grafo
+def dibujar_en_canvas(aristas, recorrido_minimo, frame_destino, nodo_resaltado=None, arista_resaltada=None):
+    for widget in frame_destino.winfo_children():
+        widget.destroy()
+        
+    # El fondo de la figura se establece en blanco
+    fig = plt.figure(figsize=(6, 6), facecolor='#FFFFFF')
     grafo = nx.Graph()
-    # Agregamos las aritas al grafo
     grafo.add_edges_from(aristas)
-    # Acomodamos la posición de los nodos para una mejor visualización
     posicion = nx.circular_layout(grafo)
-    # Dibujamos el grafo con etiquetas y pesos de las aristas
+    
+    # Evaluar qué color asignar a cada nodo
+    colores_nodos = ['#FF9800' if nodo == nodo_resaltado else "#249CF1" for nodo in grafo.nodes()]
+    
     nx.draw(grafo, 
             posicion, 
             with_labels=True,
-            node_color='lightblue',
-            node_size=1000)
-    # Obtenemos los pesos de las aristas y los dibujamos
+            node_color=colores_nodos,
+            font_color='#FFFFFF',
+            font_weight='bold',
+            edge_color='#E2E8F0',
+            node_size=1200)
+            
     texto_aristas = nx.get_edge_attributes(grafo, 'weight')
-    # Cambiamos el color de las aristas que conforman el camino minimo
+    
     aristas_recorrido_minimo = []
-    if recorrido_minimo != [-1]:
+    if recorrido_minimo and recorrido_minimo != [-1]:
         for i in range(len(recorrido_minimo)-1):
             par = tuple(sorted([recorrido_minimo[i], recorrido_minimo[i+1]]))
             aristas_recorrido_minimo.append(par)
-    # Cambiamos el color de las aristas que conforman el camino mínimo
-    nx.draw_networkx_edges(grafo, 
-                           posicion, 
-                           edgelist=aristas_recorrido_minimo, 
-                           width=4,  
-                           edge_color="red")
-    # Dibujamos las etiquetas de las aristas del camino mínimo con sus pesos
+            
+    # Dibujar aristas del recorrido mínimo definitivo en Verde
+    if aristas_recorrido_minimo:
+        nx.draw_networkx_edges(grafo, 
+                               posicion, 
+                               edgelist=aristas_recorrido_minimo, 
+                               width=4,  
+                               edge_color="#4CAF50")
+                           
+    # Dibujar la arista resaltada en evaluación en Naranja
+    if arista_resaltada:
+        u, v = arista_resaltada
+        if grafo.has_edge(u, v):
+            nx.draw_networkx_edges(grafo,
+                                   posicion,
+                                   edgelist=[(u, v)],
+                                   width=5,
+                                   edge_color="#FF9800")
+                                   
     texto_aristas_camino_minimo = dict([])
     for arista in aristas:
         par = tuple(sorted([arista[0], arista[1]]))
         if par in aristas_recorrido_minimo:
             peso = arista[2]['weight']
             texto_aristas_camino_minimo[par] = peso
+            
+    # Etiquetas de aristas estándar en Gris
     nx.draw_networkx_edge_labels(grafo, 
                                  posicion, 
-                                 edge_labels=texto_aristas)
-    # Cambiamos el color de las etiquetas con los pesos de las aristas del camino mínimo
-    nx.draw_networkx_edge_labels(grafo, 
-                                posicion, 
-                                edge_labels=texto_aristas_camino_minimo,
-                                font_size=10,
-                                font_color="red")
-    fig.canvas.manager.set_window_title("Grafo y Camino mínimo")
-    # Mostramos el grafo
-    plt.show()
+                                 edge_labels=texto_aristas,
+                                 font_color='#7A7A7A')
+    
+    # Etiquetas de aristas del camino mínimo definitivo
+    if texto_aristas_camino_minimo:
+        nx.draw_networkx_edge_labels(grafo, 
+                                    posicion, 
+                                    edge_labels=texto_aristas_camino_minimo,
+                                    font_size=11,
+                                    font_weight='bold',
+                                    font_color="#4CAF50")
+                                
+    canvas = FigureCanvasTkAgg(fig, master=frame_destino)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill="both", expand=True)
+    
+    plt.close(fig)

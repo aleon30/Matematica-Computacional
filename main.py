@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import random
 from Grafo import Grafo
-from dibujarGrafo_gui import dibujar_en_canvas
+from dibujarGrafo import dibujar_en_canvas
 
 class AplicacionGrafo:
     def __init__(self, root):
