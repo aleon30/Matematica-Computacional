@@ -46,6 +46,8 @@ https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/
 └── requirements.txt       # Dependencias del proyecto
 ```
 
+<img src="assets/diagrama_flujo.png">
+
 ## Requisitos
 
 Este proyecto está desarrollado para ejecutarse localmente con:
