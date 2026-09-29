@@ -38,12 +38,15 @@ https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/
 ## Estructura del proyecto
 
 ```text
-├── .gitignore             # Archivos ignorados por Git (pycache y .vscode)
-├── dibujarGrafo.py        # Visualización del grafo
-├── Grafo.py               # Implementación de la clase Grafo
-├── main.py                # Ejecutable principal
-├── README.md              # Resumen del proyecto, archivos y documentación
-└── requirements.txt       # Dependencias del proyecto
+└── aleon30-matematica-computacional/
+    ├── .gitignore             # Archivos ignorados por Git (pycache y .vscode)
+    ├── Grafo.py               # Implementación de la clase Grafo
+    ├── README.md              # Resumen del proyecto, archivos y documentación
+    ├── dibujarGrafo.py        # Visualización del grafo
+    ├── main.py                # Ejecutable principal
+    ├── requirements.txt       # Dependencias del proyecto
+    └── assets/ 
+        └── diagrama_flujo.png   # Diagrama de flujo del proyecto
 ```
 
 <img src="assets/diagrama_flujo.png">
