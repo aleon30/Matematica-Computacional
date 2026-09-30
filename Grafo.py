@@ -4,24 +4,43 @@ INF = 9999999
 
 class Grafo:
 
-    def matriz_pesos(self):
-        return self.matriz_adyacencia
+    def __init__(self, num_vertices):
+        self.V = num_vertices
+        self.matriz_adyacencia_ponderada = [[INF] * num_vertices for _ in range(num_vertices)]
+        for i in range(num_vertices):
+            self.matriz_adyacencia_ponderada[i][i] = 0
+        self.aristas = []
+        self.lista_adyacencia = [[] for _ in range(num_vertices)]
+        self.recorrido_minimo = []
+        self.costo_total = 0
+        self.historial_pasos = []
 
-    def matriz_caminos_directos(self):
+    def agregar_arista(self, vertice1, vertice2, peso):
+        self.matriz_adyacencia_ponderada[vertice1][vertice2] = peso
+        self.matriz_adyacencia_ponderada[vertice2][vertice1] = peso
+
+        self.aristas.append((vertice1, vertice2, {'weight': peso}))
+        self.lista_adyacencia[vertice1].append((vertice2, peso))
+        self.lista_adyacencia[vertice2].append((vertice1, peso))
+
+    def matriz_pesos(self):
+        return self.matriz_adyacencia_ponderada
+
+    def matriz_adyacencia_binaria(self):
         matriz = []
         for i in range(self.V):
             fila = []
             for j in range(self.V):
                 if i == j:
                     fila.append(0)
-                elif self.matriz_adyacencia[i][j] != 9999999:
+                elif self.matriz_adyacencia_ponderada[i][j] != INF:
                     fila.append(1)
                 else:
                     fila.append(0)
             matriz.append(fila)
         return matriz
 
-    def matriz_accesibilidad(self):
+    def matriz_caminos(self):
         import networkx as nx
         G = nx.Graph()
         G.add_edges_from(self.aristas)
@@ -37,23 +56,6 @@ class Grafo:
                     fila.append(0)
             matriz.append(fila)
         return matriz
-
-    def __init__(self, num_vertices):
-        self.V = num_vertices
-        self.matriz_adyacencia = [[INF] * num_vertices for _ in range(num_vertices)]
-        self.aristas = []
-        self.lista_adyacencia = [[] for _ in range(num_vertices)]
-        self.recorrido_minimo = []
-        self.costo_total = 0
-        self.historial_pasos = []
-
-    def agregar_arista(self, vertice1, vertice2, peso):
-        self.matriz_adyacencia[vertice1][vertice2] = peso
-        self.matriz_adyacencia[vertice2][vertice1] = peso
-
-        self.aristas.append((vertice1, vertice2, {'weight': peso}))
-        self.lista_adyacencia[vertice1].append((vertice2, peso))
-        self.lista_adyacencia[vertice2].append((vertice1, peso))
 
     def camino_minimo(self, inicio, fin):
         self.costo_total = 0
