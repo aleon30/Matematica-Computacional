@@ -8,7 +8,7 @@
 | ----------- | ---------------- | ------ |
 | Cóndor Velásquez, Angela Bibiana | U202217165 | |
 | Horna Cueva, Carlos Orlando Frank | U20241B209 | Aplicaciones del proyecto - Diseño de la interfaz visual del programa - Implementación de la matriz de pesos, adyacencia y de caminos - Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual |
-| Leon Ojeda, Adrian Alejandro | U202523195 | Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual - Creación de la clase Grafo con vértices, aristas y lista de adyacencia en el código fuente - Implementación del algoritmo de Dijkstra en Python dentro del código fuente - Graficación del Grafo con Matplotlib y NetworkX dentro del código fuente. |
+| Leon Ojeda, Adrian Alejandro | U202523195 | Creación de la clase Grafo con vértices, aristas y lista de adyacencia en el código fuente - Implementación del algoritmo de Dijkstra en Python dentro del código fuente - Graficación del Grafo con Matplotlib y NetworkX dentro del código fuente. |
 | Quispe Laura, Johan Micael | U202313035 | |
 | Sedano Barreda, Luis Enrique | U20211E001 | |
 
