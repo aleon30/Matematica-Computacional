@@ -2,18 +2,21 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import random
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Grafo import Grafo
 from dibujarGrafo import dibujar_en_canvas
+
 
 class AplicacionGrafo:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Camino Minimo")
-        self.root.geometry("950x700")
+        self.root.geometry("950x720")
         self.root.configure(bg="#FFFFFF")
         
         self.grafo_actual = None
-        self.paso_animacion_actual = 0  # Inicialización de la variable de estado
+        self.paso_animacion_actual = 0
         
         self.estilo = ttk.Style()
         self.estilo.theme_use('clam')
@@ -63,12 +66,21 @@ class AplicacionGrafo:
         self.frame_matriz = ttk.Frame(self.notebook_central, padding="10")
         self.notebook_central.add(self.frame_matriz, text="Representación matricial")
         
-        # Creación de controles de reproducción (permanecen ocultos en la inicialización)
-        self.crear_controles_reproduccion()
-        
-        # Sub-contenedor exclusivo para el canvas para evitar que eliminar widgets afecte a los botones
+        # Sub-contenedor del gráfico
         self.frame_canvas_grafo = ttk.Frame(self.frame_grafico)
         self.frame_canvas_grafo.pack(side="top", fill="both", expand=True)
+
+        # Instancia única de la figura Matplotlib
+        self.figura = Figure(figsize=(6, 6), facecolor='#FFFFFF')
+        self.ax = self.figura.add_subplot(111)
+        self.ax.axis('off')
+
+        self.canvas_matplotlib = FigureCanvasTkAgg(self.figura, master=self.frame_canvas_grafo)
+        self.canvas_widget = self.canvas_matplotlib.get_tk_widget()
+        self.canvas_widget.pack(fill="both", expand=True)
+
+        # Controles paso a paso (barra inferior)
+        self.crear_controles_reproduccion()
         
         self.crear_controles()
         self.crear_estado_vacio()
@@ -96,6 +108,7 @@ class AplicacionGrafo:
         self.btn_fin.pack(side="left", padx=5)
 
     def mostrar_reproduccion(self):
+        # Desempacar y reordenar para garantizar que los botones se ubiquen en la base
         self.frame_canvas_grafo.pack_forget()
         self.frame_reproduccion.pack(side="bottom", fill="x", pady=(10, 0))
         self.frame_canvas_grafo.pack(side="top", fill="both", expand=True)
@@ -105,8 +118,7 @@ class AplicacionGrafo:
             self.frame_reproduccion.pack_forget()
 
     def crear_estado_vacio(self):
-        # El texto vacío ahora se vincula al sub-contenedor del canvas
-        self.label_vacio_grafo = ttk.Label(self.frame_canvas_grafo, text="El grafo visualizado aparecera aqui", font=("Helvetica", 12), foreground="#7A7A7A")
+        self.label_vacio_grafo = ttk.Label(self.frame_canvas_grafo, text="El grafo visualizado aparecerá aquí", font=("Helvetica", 12), foreground="#7A7A7A")
         self.label_vacio_grafo.place(relx=0.5, rely=0.5, anchor="center")
 
     def crear_vista_matriz(self):
@@ -137,7 +149,7 @@ class AplicacionGrafo:
         if self.grafo_actual is None:
             return
             
-        if self.label_vacio_matriz.winfo_exists():
+        if self.label_vacio_matriz.winfo_ismapped():
             self.label_vacio_matriz.place_forget()
             
         self.frame_opciones_matriz.pack(side="top", fill="x", pady=(0, 10))
@@ -277,8 +289,11 @@ class AplicacionGrafo:
                         
             self.label_resultado.config(text="Estado: Grafo generado automaticamente.", style='Exito.TLabel')
             self.limpiar_paso_a_paso()
-            # Ahora la gráfica se inserta sobre el frame_canvas_grafo
-            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_canvas_grafo)
+            
+            if self.label_vacio_grafo.winfo_ismapped():
+                self.label_vacio_grafo.place_forget()
+                
+            dibujar_en_canvas(self.ax, self.canvas_matplotlib, self.grafo_actual.aristas, self.grafo_actual.V)
             self.actualizar_vista_matriz()
             
         elif metodo == "manual":
@@ -327,10 +342,10 @@ class AplicacionGrafo:
             if vertice1 == vertice2:
                 messagebox.showerror("Error", "Una arista debe conectar dos vértices distintos.", parent=ventana_manual)
                 return
-            if peso <= 0:
-                messagebox.showerror("Error", "El peso debe ser un entero positivo.", parent=ventana_manual)
+            if peso < 0:
+                messagebox.showerror("Error", "El peso debe ser un entero no negativo.", parent=ventana_manual)
                 return
-            if self.grafo_actual.matriz_adyacencia[vertice1][vertice2] != 9999999:
+            if self.grafo_actual.matriz_adyacencia_ponderada[vertice1][vertice2] != 9999999:
                 messagebox.showerror("Error", "Ya existe una arista entre esos vértices.", parent=ventana_manual)
                 return
 
@@ -346,7 +361,11 @@ class AplicacionGrafo:
             ventana_manual.destroy()
             self.label_resultado.config(text="Estado: Grafo manual generado exitosamente.", style='Exito.TLabel')
             self.limpiar_paso_a_paso()
-            dibujar_en_canvas(self.grafo_actual.aristas, [], self.frame_canvas_grafo)
+            
+            if self.label_vacio_grafo.winfo_ismapped():
+                self.label_vacio_grafo.place_forget()
+                
+            dibujar_en_canvas(self.ax, self.canvas_matplotlib, self.grafo_actual.aristas, self.grafo_actual.V)
             self.actualizar_vista_matriz()
 
         ttk.Button(frame_interior, text="Añadir arista", style='Secundario.TButton', command=agregar_arista_manual).pack(pady=(0, 10))
@@ -371,7 +390,6 @@ class AplicacionGrafo:
             
         self.grafo_actual.camino_minimo(inicio, fin)
         
-        # Reiniciar el contador al inicio y desplegar la botonera de reproducción
         self.paso_animacion_actual = 0
         self.mostrar_reproduccion()
         
@@ -382,11 +400,11 @@ class AplicacionGrafo:
             texto_res = f"Ruta: {self.grafo_actual.recorrido_minimo}\nCosto Total: {self.grafo_actual.costo_total}"
             self.label_resultado.config(text=texto_res, style='Exito.TLabel')
             
-        # Se renderiza el fotograma inicial en el gráfico y en la tabla de pasos
         self.renderizar_paso_actual()
 
     def limpiar_paso_a_paso(self):
         self.tabla_pasos.delete(*self.tabla_pasos.get_children())
+        self.label_explicacion_paso.config(text="")
 
     def renderizar_paso_actual(self):
         if not self.grafo_actual or not self.grafo_actual.historial_pasos:
@@ -395,12 +413,10 @@ class AplicacionGrafo:
         paso_actual = self.grafo_actual.historial_pasos[self.paso_animacion_actual]
         self.label_explicacion_paso.config(text=paso_actual.get('mensaje', ''))
         
-        # Limpiar la tabla antes de rellenar el historial hasta el fotograma actual
-        self.limpiar_paso_a_paso()
+        # Limpiar la tabla e insertar progresivamente hasta el paso activo
+        self.tabla_pasos.delete(*self.tabla_pasos.get_children())
         
         ultima_fila = None
-        
-        # Iterar e insertar filas desde el paso 0 hasta el paso_animacion_actual
         for i in range(self.paso_animacion_actual + 1):
             p = self.grafo_actual.historial_pasos[i]
             
@@ -409,7 +425,6 @@ class AplicacionGrafo:
                 ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
                 
             elif p['tipo'] == 'evaluando':
-                # Preparar el texto de cálculo comparando el nuevo costo vs el ya conocido
                 costo_conocido = p.get('costo_conocido', 'INF')
                 if costo_conocido == 9999999:
                     costo_conocido = "INF"
@@ -425,11 +440,10 @@ class AplicacionGrafo:
                 valores = (i, p['nodo'], "-", "-", "Destino!")
                 ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
                 
-        # Hacer scroll automático a la última fila insertada
         if ultima_fila:
             self.tabla_pasos.see(ultima_fila)
             
-        # Renderizado visual del grafo para el fotograma actual
+        # Determinar resaltados visuales del paso
         nodo_resaltado = None
         arista_resaltada = None
         recorrido_mostrar = []
@@ -447,10 +461,12 @@ class AplicacionGrafo:
             recorrido_mostrar = self.grafo_actual.recorrido_minimo
             
         dibujar_en_canvas(
-            self.grafo_actual.aristas, 
-            recorrido_mostrar, 
-            self.frame_canvas_grafo, 
-            nodo_resaltado=nodo_resaltado, 
+            self.ax,
+            self.canvas_matplotlib,
+            self.grafo_actual.aristas,
+            self.grafo_actual.V,
+            recorrido_minimo=recorrido_mostrar,
+            nodo_resaltado=nodo_resaltado,
             arista_resaltada=arista_resaltada
         )
 

@@ -1,79 +1,50 @@
 import networkx as nx
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-def dibujar_en_canvas(aristas, recorrido_minimo, frame_destino, nodo_resaltado=None, arista_resaltada=None):
-    for widget in frame_destino.winfo_children():
-        widget.destroy()
-        
-    # El fondo de la figura se establece en blanco
-    fig = plt.figure(figsize=(6, 6), facecolor='#FFFFFF')
+def dibujar_en_canvas(ax, canvas, aristas, num_vertices, recorrido_minimo=None, nodo_resaltado=None, arista_resaltada=None):
+    # Limpiar únicamente los ejes de dibujo sin destruir el widget de la ventana
+    ax.clear()
+    ax.axis('off')
+
+    # Crear el grafo garantizando que todos los vértices (incluso aislados) existan
     grafo = nx.Graph()
+    grafo.add_nodes_from(range(num_vertices))
     grafo.add_edges_from(aristas)
     posicion = nx.circular_layout(grafo)
-    
-    # Evaluar qué color asignar a cada nodo
+
+    # Identificar el color de cada nodo según el paso evaluado
     colores_nodos = ['#FF9800' if nodo == nodo_resaltado else "#249CF1" for nodo in grafo.nodes()]
-    
-    nx.draw(grafo, 
-            posicion, 
-            with_labels=True,
-            node_color=colores_nodos,
-            font_color='#FFFFFF',
-            font_weight='bold',
-            edge_color='#E2E8F0',
-            node_size=1200)
-            
-    texto_aristas = nx.get_edge_attributes(grafo, 'weight')
-    
+
+    # Trazado base de nodos, etiquetas y aristas
+    nx.draw_networkx_nodes(grafo, posicion, node_color=colores_nodos, node_size=1200, ax=ax)
+    nx.draw_networkx_labels(grafo, posicion, font_color='#FFFFFF', font_weight='bold', font_size=10, ax=ax)
+    nx.draw_networkx_edges(grafo, posicion, edge_color='#CBD5E1', width=1.5, ax=ax)
+
+    # Aristas del recorrido mínimo definitivo (en verde)
     aristas_recorrido_minimo = []
     if recorrido_minimo and recorrido_minimo != [-1]:
-        for i in range(len(recorrido_minimo)-1):
-            par = tuple(sorted([recorrido_minimo[i], recorrido_minimo[i+1]]))
+        for i in range(len(recorrido_minimo) - 1):
+            par = tuple(sorted([recorrido_minimo[i], recorrido_minimo[i + 1]]))
             aristas_recorrido_minimo.append(par)
-            
-    # Dibujar aristas del recorrido mínimo definitivo en Verde
+
     if aristas_recorrido_minimo:
-        nx.draw_networkx_edges(grafo, 
-                               posicion, 
-                               edgelist=aristas_recorrido_minimo, 
-                               width=4,  
-                               edge_color="#4CAF50")
-                           
-    # Dibujar la arista resaltada en evaluación en Naranja
+        nx.draw_networkx_edges(grafo, posicion, edgelist=aristas_recorrido_minimo, width=4, edge_color="#4CAF50", ax=ax)
+
+    # Arista bajo evaluación en el paso actual (en naranja)
     if arista_resaltada:
         u, v = arista_resaltada
         if grafo.has_edge(u, v):
-            nx.draw_networkx_edges(grafo,
-                                   posicion,
-                                   edgelist=[(u, v)],
-                                   width=5,
-                                   edge_color="#FF9800")
-                                   
-    texto_aristas_camino_minimo = dict([])
-    for arista in aristas:
-        par = tuple(sorted([arista[0], arista[1]]))
-        if par in aristas_recorrido_minimo:
-            peso = arista[2]['weight']
-            texto_aristas_camino_minimo[par] = peso
-            
-    # Etiquetas de aristas estándar en Gris
-    nx.draw_networkx_edge_labels(grafo, 
-                                 posicion, 
-                                 edge_labels=texto_aristas,
-                                 font_color='#7A7A7A')
-    
-    # Etiquetas de aristas del camino mínimo definitivo
-    if texto_aristas_camino_minimo:
-        nx.draw_networkx_edge_labels(grafo, 
-                                    posicion, 
-                                    edge_labels=texto_aristas_camino_minimo,
-                                    font_size=11,
-                                    font_weight='bold',
-                                    font_color="#4CAF50")
-                                
-    canvas = FigureCanvasTkAgg(fig, master=frame_destino)
+            nx.draw_networkx_edges(grafo, posicion, edgelist=[(u, v)], width=4, edge_color="#FF9800", ax=ax)
+
+    # Pesos de las aristas
+    texto_aristas = nx.get_edge_attributes(grafo, 'weight')
+    texto_aristas_min = {
+        par: peso for par, peso in texto_aristas.items() 
+        if tuple(sorted(par)) in aristas_recorrido_minimo
+    }
+
+    nx.draw_networkx_edge_labels(grafo, posicion, edge_labels=texto_aristas, font_color='#7A7A7A', ax=ax)
+    if texto_aristas_min:
+        nx.draw_networkx_edge_labels(grafo, posicion, edge_labels=texto_aristas_min, font_size=11, font_weight='bold', font_color="#4CAF50", ax=ax)
+
+    # Actualizar la vista del lienzo existente
     canvas.draw()
-    canvas.get_tk_widget().pack(fill="both", expand=True)
-    
-    plt.close(fig)
