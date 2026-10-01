@@ -87,25 +87,56 @@ class AplicacionGrafo:
         self.crear_vista_matriz()
 
     def crear_controles_reproduccion(self):
-        self.frame_reproduccion = ttk.Frame(self.frame_grafico)
+        # Contenedor con borde y separación definida
+        self.frame_reproduccion = ttk.Frame(self.frame_grafico, padding="12 8")
         
-        self.label_explicacion_paso = ttk.Label(self.frame_reproduccion, text="", font=("Helvetica", 11, "italic"), anchor="center")
+        # Etiqueta con estilo más definido y limpio
+        self.label_explicacion_paso = ttk.Label(
+            self.frame_reproduccion, 
+            text="", 
+            font=("Helvetica", 10, "bold"), 
+            foreground="#1E293B",
+            anchor="center"
+        )
         self.label_explicacion_paso.pack(fill="x", pady=(0, 10))
         
         frame_botones = ttk.Frame(self.frame_reproduccion)
         frame_botones.pack(anchor="center")
         
-        self.btn_inicio = ttk.Button(frame_botones, text="[<<] Inicio", style='Secundario.TButton', command=self.ir_inicio)
-        self.btn_inicio.pack(side="left", padx=5)
+        # Acciones secundarias (Inicio y Anterior)
+        self.btn_inicio = ttk.Button(
+            frame_botones, 
+            text="⏮ Inicio", 
+            style='Secundario.TButton', 
+            command=self.ir_inicio
+        )
+        self.btn_inicio.pack(side="left", padx=4)
         
-        self.btn_anterior = ttk.Button(frame_botones, text="[<] Anterior", style='Secundario.TButton', command=self.ir_paso_anterior)
-        self.btn_anterior.pack(side="left", padx=5)
+        self.btn_anterior = ttk.Button(
+            frame_botones, 
+            text="◀ Anterior", 
+            style='Secundario.TButton', 
+            command=self.ir_paso_anterior
+        )
+        self.btn_anterior.pack(side="left", padx=4)
         
-        self.btn_siguiente = ttk.Button(frame_botones, text="[>] Siguiente", style='Secundario.TButton', command=self.ir_paso_siguiente)
-        self.btn_siguiente.pack(side="left", padx=5)
+        # Acción primaria destacada (Siguiente)
+        self.btn_siguiente = ttk.Button(
+            frame_botones, 
+            text="Siguiente ▶", 
+            style='Primario.TButton', 
+            command=self.ir_paso_siguiente
+        )
+        self.btn_siguiente.pack(side="left", padx=4)
         
-        self.btn_fin = ttk.Button(frame_botones, text="[>>] Fin", style='Secundario.TButton', command=self.ir_fin)
-        self.btn_fin.pack(side="left", padx=5)
+        # Acción secundaria (Fin)
+        self.btn_fin = ttk.Button(
+            frame_botones, 
+            text="Fin ⏭", 
+            style='Secundario.TButton', 
+            command=self.ir_fin
+        )
+        self.btn_fin.pack(side="left", padx=4)
 
     def mostrar_reproduccion(self):
         # Desempacar y reordenar para garantizar que los botones se ubiquen en la base
