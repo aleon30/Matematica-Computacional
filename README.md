@@ -1,57 +1,64 @@
-# Matemática Computacional 💻 - Grupo 2
+# Matemática Computacional 💻 - TB1
 
-| Integrantes |
-| ----------- |
-| Luis Enrique Sedano Barreda |
-| Carlos Orlando Horna Cueva |
-| Angela Bibiana Cóndor Velásquez |
-| Johan Micael Quispe Laura |
-| Adrian Alejandro Leon Ojeda |
+<img src="assets/logo.jpg">
 
-## Caso del proyecto
+## 👥 Integrantes 
+
+| Integrante | Código de alumno | Aportes |
+| ----------- | ---------------- | ------ |
+| Cóndor Velásquez, Angela Bibiana | U202217165 | |
+| Horna Cueva, Carlos Orlando Frank | U20241B209 | Aplicaciones del proyecto - Diseño de la interfaz visual del programa - Implementación de la matriz de pesos, adyacencia y de caminos - Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual |
+| Leon Ojeda, Adrian Alejandro | U202523195 | Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual - Creación de la clase Grafo con vértices, aristas y lista de adyacencia en el código fuente - Implementación del algoritmo de Dijkstra en Python dentro del código fuente - Graficación del Grafo con Matplotlib y NetworkX dentro del código fuente. |
+| Quispe Laura, Johan Micael | U202313035 | |
+| Sedano Barreda, Luis Enrique | U20211E001 | |
+
+## 📝 Caso del proyecto
 
 **Caso 2: Problema del camino mínimo**
 
-Desarrolle un programa que resuelva el problema del camino mínimo en un grafo ponderado.
+FastRoute es un programa computacional en Python que resuelve el problema del camino mínimo en un grafo ponderado, utilizando el algoritmo de Dijkstra.
 
-El programa deberá solicitar al usuario el número de vértices 𝑛, con _5 ≤ 𝑛 ≤ 15_, y ofrecer dos opciones para construir la matriz de adyacencia ponderada de tamaño 𝑛 × 𝑛:
+El programa solicita al usuario que ingrese un número de vértices 𝑛, con _5 ≤ 𝑛 ≤ 15_, y ofrece 2 opciones para construir un grafo:
 
-- Generación automática: crear aleatoriamente una matriz cuyos elementos
-sean pesos no negativos, representando las aristas del grafo.
-- Ingreso manual: permitir que el usuario introduzca los pesos de la matriz.
+- Generación automática: crea aleatoriamente una matriz con pesos no negativos, representando las aristas del grafo.
+- Ingreso manual: permite que el usuario introduzca las aristas del grafo, específicando el vértice 1, vértice 2 y el peso de la arista.
 
-Una vez construida la matriz, el programa deberá generar y mostrar el grafo ponderado correspondiente.
+Una vez terminada la generación del grafo, el programa grafica los vértices y los nodos del grafo con sus pesos correspondientes. Asimismo, el programa genera la matriz de adyacencia binaria, la matriz de adyacencia ponderada y la matriz de caminos de tamaño 𝑛 × 𝑛 correspondientes al grafo.
 
-Posteriormente, el usuario seleccionará un vértice de origen y un vértice de destino, y el programa determinará el camino mínimo entre ambos, indicando la secuencia de vértices que lo conforman, el costo total del recorrido y el desarrollo paso a paso del algoritmo empleado para obtener la
-solución.
+Finalmente, el programa permite que usuario seleccione un vértice de origen y un vértice de destino, y el programa determina el camino mínimo entre ambos, indicando la secuencia de vértices que lo conforman, el costo total del recorrido y el desarrollo paso a paso del algoritmo de Dijkstra utilizado para obtener la solución.
 
-## Ensayo escrito
+## 🤔 ¿Cómo ejecutar el programa?
 
-https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/edit?usp=sharing
+- Debe contar con todas las dependencias principales del proyecto, las cuales están detalladas en la parte de [requisitos](#-requisitos).
+- Para instalar estas dependencias, se puede usar la terminal tal como se detalla en la parte de [instalación local](#instalación-local).
+- Debe ejecutarse el archivo [main](main.py) en un entorno con Python >= 3.11, y se podrá utilizar la aplicación correctamente.
 
-## Presentación
+## 📃 Ensayo escrito
 
-```
-(Colocar link del Canva)
-```
+<https://docs.google.com/document/d/1fkgKkOlmoDAklxEF-dcQPGk53CMKxI-PJQ0BN2SKPco/edit?usp=sharing>
 
-## Estructura del proyecto
+## 🗂️ Estructura del proyecto
+
+### Estructura de archivos
 
 ```text
 └── aleon30-matematica-computacional/
     ├── .gitignore             # Archivos ignorados por Git (pycache y .vscode)
     ├── Grafo.py               # Implementación de la clase Grafo
-    ├── README.md              # Resumen del proyecto, archivos y documentación
+    ├── README.md              # Resumen del proyecto y documentación
     ├── dibujarGrafo.py        # Visualización del grafo
     ├── main.py                # Ejecutable principal
     ├── requirements.txt       # Dependencias del proyecto
     └── assets/ 
-        └── diagrama_flujo.png   # Diagrama de flujo del proyecto
+        ├── diagrama_flujo.png   # Diagrama de flujo del proyecto
+        └── logo.png             # Logo del proyecto
 ```
+
+### Diagrama de flujo
 
 <img src="assets/diagrama_flujo.png">
 
-## Requisitos
+## 🔧 Requisitos
 
 Este proyecto está desarrollado para ejecutarse localmente con:
 
@@ -66,7 +73,7 @@ Este proyecto está desarrollado para ejecutarse localmente con:
 
 ### Instalación local
 
-Puedes instalar las dependencias usando el archivo `requirements.txt` en la terminal:
+Puedes instalar las dependencias usando el archivo `requirements.txt` con el siguiente comando en la terminal:
 
 ```bash
 pip install -r requirements.txt
