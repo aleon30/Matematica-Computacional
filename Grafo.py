@@ -59,6 +59,7 @@ class Grafo:
 
     def camino_minimo(self, inicio, fin):
         self.costo_total = 0
+        self.recorrido_minimo = []
         self.historial_pasos = []
         visitados = [False] * self.V
         distancias = [INF] * self.V
@@ -74,10 +75,21 @@ class Grafo:
             peso, anterior, actual = heapq.heappop(cola)
             
             if visitados[actual]:
+                self.historial_pasos.append({
+                    'tipo': 'Descartado',
+                    'nodo_actual': actual,
+                    'costo': peso,
+                    'costo_conocido': distancias[actual][0],
+                    'decision': 'Descartado',
+                    'mensaje': (
+                        f"Se descarta la ruta con costo {peso} hacia el nodo {actual}: "
+                        f"ya fue visitado con costo {distancias[actual][0]}."
+                    )
+                })
                 continue
                 
             self.historial_pasos.append({
-                'tipo': 'visitando',
+                'tipo': 'Visitado',
                 'nodo': actual,
                 'costo': peso,
                 'mensaje': f"Visitando nodo {actual}. Costo acumulado: {peso}"
@@ -99,27 +111,34 @@ class Grafo:
                 if not visitados[vecino]:
                     nuevo_peso = peso + peso_vecino
                     costo_conocido = mejores_distancias[vecino]
-                    
-                    # Proceso de relajación
-                    if nuevo_peso < costo_conocido:
-                        decision = 'Actualiza'
-                        mejores_distancias[vecino] = nuevo_peso
-                        heapq.heappush(cola, (nuevo_peso, actual, vecino))
-                    else:
-                        decision = 'Descarta'
-                        
+                    mejores_distancias[vecino] = min(costo_conocido, nuevo_peso)
+                    heapq.heappush(cola, (nuevo_peso, actual, vecino))
+
                     self.historial_pasos.append({
-                        'tipo': 'evaluando',
+                        'tipo': 'Agregar a cola',
                         'nodo_actual': actual,
                         'vecino': vecino,
+                        'peso_arista': peso_vecino,
                         'costo_conocido': costo_conocido,
                         'nuevo_costo': nuevo_peso,
-                        'decision': decision,
-                        'mensaje': f"Evaluando ruta {actual} -> {vecino}. Conocido: {costo_conocido if costo_conocido != INF else 'INF'}, Nuevo: {nuevo_peso}. {decision}."
+                        'decision': 'Encolada',
+                        'mensaje': (
+                            f"Evaluando arista {actual} -> {vecino} "
+                            f"(peso: {peso_vecino}). "
+                            f"Costo acumulado: {nuevo_peso}. "
+                            f"Mejor costo conocido para {vecino}: "
+                            f"{costo_conocido if costo_conocido != INF else 'INF'}, "
+                            f"se agrega a la cola."
+                        )
                     })
                     
         if distancias[fin] == INF:
             self.recorrido_minimo = [-1]
+            self.historial_pasos.append({
+                'tipo': 'sin_camino',
+                'nodo': fin,
+                'mensaje': f"No existe un camino desde {inicio} hasta {fin}."
+            })
             return
             
         recorrido = []
