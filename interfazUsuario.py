@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Grafo import Grafo
 from dibujarGrafo import dibujar_en_canvas
 
+INF = 9999999
 
 class AplicacionGrafo:
     def __init__(self, root):
@@ -294,6 +295,7 @@ class AplicacionGrafo:
         
         self.tabla_pasos.tag_configure('actualiza', foreground='#15803D')
         self.tabla_pasos.tag_configure('descarta', foreground='#94A3B8')
+        self.tabla_pasos.tag_configure('encolada', foreground='#0F766E')
         self.tabla_pasos.tag_configure('visita', foreground='#1E3A8A', font=('Helvetica', 9, 'bold'))
 
     def evento_generar_grafo(self):
@@ -451,25 +453,42 @@ class AplicacionGrafo:
         for i in range(self.paso_animacion_actual + 1):
             p = self.grafo_actual.historial_pasos[i]
             
-            if p['tipo'] == 'visitando':
-                valores = (i, p['nodo'], "-", f"Costo: {p['costo']}", "Visitando")
+            if p['tipo'] == 'Visitado':
+                valores = (i, p['nodo'], "-", f"Acumulado: {p['costo']}", "Visitando")
                 ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
                 
-            elif p['tipo'] == 'evaluando':
+            elif p['tipo'] == 'Agregar a cola':
                 costo_conocido = p.get('costo_conocido', 'INF')
-                if costo_conocido == 9999999:
+                if costo_conocido == INF:
                     costo_conocido = "INF"
                     
-                calculo_str = f"Nuevo: {p['nuevo_costo']} (vs {costo_conocido})"
+                calculo_str = (
+                    f"Arista: {p['peso_arista']}; acumulado: {p['nuevo_costo']} "
+                    f"(mejor: {costo_conocido})"
+                )
                 decision = p['decision']
                 
-                tag = 'actualiza' if decision == 'Actualiza' else 'descarta'
                 valores = (i, p['nodo_actual'], p['vecino'], calculo_str, decision)
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=(tag,))
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('encolada',))
+
+            elif p['tipo'] == 'Descartado':
+                costo_conocido = p['costo_conocido']
+                valores = (
+                    i,
+                    p['nodo_actual'],
+                    "-",
+                    f"Costo: {p['costo']} (visitado: {costo_conocido})",
+                    p['decision']
+                )
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('descarta',))
                 
             elif p['tipo'] == 'destino_alcanzado':
                 valores = (i, p['nodo'], "-", "-", "Destino!")
                 ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
+
+            elif p['tipo'] == 'sin_camino':
+                valores = (i, p['nodo'], "-", "-", "Sin camino")
+                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('descarta',))
                 
         if ultima_fila:
             self.tabla_pasos.see(ultima_fila)
@@ -479,11 +498,13 @@ class AplicacionGrafo:
         arista_resaltada = None
         recorrido_mostrar = []
         
-        if paso_actual['tipo'] == 'visitando':
+        if paso_actual['tipo'] == 'Visitado':
             nodo_resaltado = paso_actual.get('nodo')
-        elif paso_actual['tipo'] == 'evaluando':
+        elif paso_actual['tipo'] == 'Agregar a cola':
             nodo_resaltado = paso_actual.get('nodo_actual')
             arista_resaltada = (paso_actual.get('nodo_actual'), paso_actual.get('vecino'))
+        elif paso_actual['tipo'] == 'Descartado':
+            nodo_resaltado = paso_actual.get('nodo_actual')
         elif paso_actual['tipo'] == 'destino_alcanzado':
             nodo_resaltado = paso_actual.get('nodo')
             
