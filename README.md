@@ -4,13 +4,13 @@
 
 ## 👥 Integrantes 
 
-| Integrante | Código de alumno | Aportes |
-| ----------- | ---------------- | ------ |
-| Cóndor Velásquez, Angela Bibiana | U202217165 | |
-| Horna Cueva, Carlos Orlando Frank | U20241B209 | Aplicaciones del proyecto - Diseño de la interfaz visual del programa - Implementación de la matriz de pesos, adyacencia y de caminos - Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual |
-| Leon Ojeda, Adrian Alejandro | U202523195 | Creación de la clase Grafo con vértices, aristas y lista de adyacencia en el código fuente - Implementación del algoritmo de Dijkstra en Python dentro del código fuente - Graficación del Grafo con Matplotlib y NetworkX dentro del código fuente. |
-| Quispe Laura, Johan Micael | U202313035 | |
-| Sedano Barreda, Luis Enrique | U20211E001 | |
+| Integrante | Aportes |
+| ----------- | ------ |
+| Cóndor Velásquez, Angela Bibiana | Redacción de la introducción y desarrollo del marco teórico, la teoría de grafos y su aplicación en problemas de caminos mínimos - Se desarrolló la formulación teórica para encontrar la trayectoria de menor costo entre un vértice de origen y uno de destino, incluyendo la representación y suma de los costos de las aristas, así como el fundamento y funcionamiento paso a paso del algoritmo de Dijkstra |
+| Horna Cueva, Carlos Orlando Frank | Aplicaciones del proyecto - Diseño de la interfaz visual del programa - Implementación de la matriz de pesos, adyacencia y de caminos - Implementación del paso a paso del algoritmo de Dijkstra en la interfaz visual |
+| Leon Ojeda, Adrian Alejandro | Creación de la clase Grafo con vértices, aristas y lista de adyacencia en el código fuente - Implementación del algoritmo de Dijkstra en Python dentro del código fuente - Graficación del Grafo con Matplotlib y NetworkX dentro del código fuente. |
+| Quispe Laura, Johan Micael | Redacción de la introducción - Planteamiento del problema, explicación de la teoría de grafos y justificación del uso del algoritmo de Dijkstra |
+| Sedano Barreda, Luis Enrique | Desarrollo del marco teórico - Formulación teórica de cómo encontrar el camino mínimo partiendo de un vértice de origen hasta un vértice de destino - Explicación de la suma de costos y el funcionamiento del algoritmo de Dijkstra |
 
 ## 📝 Caso del proyecto
 
