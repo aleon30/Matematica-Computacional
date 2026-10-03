@@ -81,6 +81,7 @@ class Grafo:
                     'costo': peso,
                     'costo_conocido': distancias[actual][0],
                     'decision': 'Descartado',
+                    'cola_prioridad': sorted(cola),
                     'mensaje': (
                         f"Se descarta la ruta con costo {peso} hacia el nodo {actual}: "
                         f"ya fue visitado con costo {distancias[actual][0]}."
@@ -92,6 +93,7 @@ class Grafo:
                 'tipo': 'Visitado',
                 'nodo': actual,
                 'costo': peso,
+                'cola_prioridad': sorted(cola),
                 'mensaje': f"Visitando nodo {actual}. Costo acumulado: {peso}"
             })
             
@@ -103,6 +105,7 @@ class Grafo:
                 self.historial_pasos.append({
                     'tipo': 'destino_alcanzado',
                     'nodo': actual,
+                    'cola_prioridad': sorted(cola),
                     'mensaje': f"¡Nodo destino {fin} alcanzado!"
                 })
                 break
@@ -122,6 +125,7 @@ class Grafo:
                         'costo_conocido': costo_conocido,
                         'nuevo_costo': nuevo_peso,
                         'decision': 'Encolada',
+                        'cola_prioridad': sorted(cola),
                         'mensaje': (
                             f"Evaluando arista {actual} -> {vecino} "
                             f"(peso: {peso_vecino}). "
@@ -137,6 +141,7 @@ class Grafo:
             self.historial_pasos.append({
                 'tipo': 'sin_camino',
                 'nodo': fin,
+                'cola_prioridad': sorted(cola),
                 'mensaje': f"No existe un camino desde {inicio} hasta {fin}."
             })
             return

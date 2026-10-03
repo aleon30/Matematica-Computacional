@@ -101,6 +101,34 @@ class AplicacionGrafo:
         )
         self.label_explicacion_paso.pack(fill="x", pady=(0, 10))
         
+        frame_cola = ttk.LabelFrame(
+            self.frame_reproduccion,
+            text="Cola de prioridad (costo, nodo, predecesor)",
+            padding=4
+        )
+        frame_cola.pack(fill="x", pady=(0, 10))
+
+        self.tabla_cola_prioridad = ttk.Treeview(
+            frame_cola,
+            columns=("Costo", "Nodo", "Predecesor"),
+            show="headings",
+            height=3,
+            selectmode="none"
+        )
+        self.scroll_cola_prioridad = ttk.Scrollbar(
+            frame_cola,
+            orient="vertical",
+            command=self.tabla_cola_prioridad.yview
+        )
+        self.tabla_cola_prioridad.configure(yscrollcommand=self.scroll_cola_prioridad.set)
+        self.tabla_cola_prioridad.pack(side="left", fill="x", expand=True)
+        self.scroll_cola_prioridad.pack(side="right", fill="y")
+
+        for columna, ancho in (("Costo", 80), ("Nodo", 70), ("Predecesor", 100)):
+            self.tabla_cola_prioridad.heading(columna, text=columna)
+            self.tabla_cola_prioridad.column(columna, width=ancho, anchor="center")
+        self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
+
         frame_botones = ttk.Frame(self.frame_reproduccion)
         frame_botones.pack(anchor="center")
         
@@ -437,6 +465,8 @@ class AplicacionGrafo:
 
     def limpiar_paso_a_paso(self):
         self.tabla_pasos.delete(*self.tabla_pasos.get_children())
+        self.tabla_cola_prioridad.delete(*self.tabla_cola_prioridad.get_children())
+        self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
         self.label_explicacion_paso.config(text="")
 
     def renderizar_paso_actual(self):
@@ -445,6 +475,18 @@ class AplicacionGrafo:
             
         paso_actual = self.grafo_actual.historial_pasos[self.paso_animacion_actual]
         self.label_explicacion_paso.config(text=paso_actual.get('mensaje', ''))
+
+        self.tabla_cola_prioridad.delete(*self.tabla_cola_prioridad.get_children())
+        cola_prioridad = paso_actual.get('cola_prioridad', [])
+        if cola_prioridad:
+            for costo, predecesor, nodo in cola_prioridad:
+                self.tabla_cola_prioridad.insert(
+                    "",
+                    "end",
+                    values=(costo, nodo, "-" if predecesor == -1 else predecesor)
+                )
+        else:
+            self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
         
         # Limpiar la tabla e insertar progresivamente hasta el paso activo
         self.tabla_pasos.delete(*self.tabla_pasos.get_children())
