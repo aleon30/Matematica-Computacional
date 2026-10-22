@@ -6,10 +6,16 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Grafo import Grafo
 from dibujarGrafo import dibujar_en_canvas
+from estilos_tablas import configurar_estilos_tablas
+from tabla_pasos import TablaPasosModerna
+from estrategias_tablas import RegistroEstrategiasPaso, crear_evento_desde_diccionario
+from tabla_cola import TablaColaModerna
+from tabla_matriz import TablaMatrizModerna
 
 INF = 9999999
 
 class AplicacionGrafo:
+    
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Camino Minimo")
@@ -18,9 +24,11 @@ class AplicacionGrafo:
         
         self.grafo_actual = None
         self.paso_animacion_actual = 0
-        
+
         self.estilo = ttk.Style()
         self.estilo.theme_use('clam')
+        configurar_estilos_tablas(self.estilo)
+        self.registro_estrategias = RegistroEstrategiasPaso()
         
         self.estilo.configure('TFrame', background='#FFFFFF')
         
@@ -51,6 +59,9 @@ class AplicacionGrafo:
         self.estilo.configure('TNotebook', background=COLOR_FONDO, borderwidth=0)
         self.estilo.configure('TNotebook.Tab', background="#E2E8F0", foreground=COLOR_TEXTO, padding=[10, 5], font=FUENTE_BASE)
         self.estilo.map('TNotebook.Tab', background=[('selected', COLOR_PRIMARIO)], foreground=[('selected', COLOR_FONDO)])
+        
+        # Altura de fila suficiente para mostrar dos líneas de texto limpiamente
+        self.estilo.configure('Treeview', rowheight=36)
         
         self.panel_principal = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, bg=COLOR_FONDO, borderwidth=0)
         self.panel_principal.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
@@ -88,10 +99,8 @@ class AplicacionGrafo:
         self.crear_vista_matriz()
 
     def crear_controles_reproduccion(self):
-        # Contenedor con borde y separación definida
         self.frame_reproduccion = ttk.Frame(self.frame_grafico, padding="12 8")
         
-        # Etiqueta con estilo más definido y limpio
         self.label_explicacion_paso = ttk.Label(
             self.frame_reproduccion, 
             text="", 
@@ -101,38 +110,12 @@ class AplicacionGrafo:
         )
         self.label_explicacion_paso.pack(fill="x", pady=(0, 10))
         
-        frame_cola = ttk.LabelFrame(
-            self.frame_reproduccion,
-            text="Cola de prioridad (costo, nodo, predecesor)",
-            padding=4
-        )
-        frame_cola.pack(fill="x", pady=(0, 10))
-
-        self.tabla_cola_prioridad = ttk.Treeview(
-            frame_cola,
-            columns=("Costo", "Nodo", "Predecesor"),
-            show="headings",
-            height=3,
-            selectmode="none"
-        )
-        self.scroll_cola_prioridad = ttk.Scrollbar(
-            frame_cola,
-            orient="vertical",
-            command=self.tabla_cola_prioridad.yview
-        )
-        self.tabla_cola_prioridad.configure(yscrollcommand=self.scroll_cola_prioridad.set)
-        self.tabla_cola_prioridad.pack(side="left", fill="x", expand=True)
-        self.scroll_cola_prioridad.pack(side="right", fill="y")
-
-        for columna, ancho in (("Costo", 80), ("Nodo", 70), ("Predecesor", 100)):
-            self.tabla_cola_prioridad.heading(columna, text=columna)
-            self.tabla_cola_prioridad.column(columna, width=ancho, anchor="center")
-        self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
+        # Módulo Profundo de la Cola de Prioridad
+        self.tabla_cola_prioridad = TablaColaModerna(self.frame_reproduccion)
 
         frame_botones = ttk.Frame(self.frame_reproduccion)
         frame_botones.pack(anchor="center")
         
-        # Acciones secundarias (Inicio y Anterior)
         self.btn_inicio = ttk.Button(
             frame_botones, 
             text="⏮ Inicio", 
@@ -149,7 +132,6 @@ class AplicacionGrafo:
         )
         self.btn_anterior.pack(side="left", padx=4)
         
-        # Acción primaria destacada (Siguiente)
         self.btn_siguiente = ttk.Button(
             frame_botones, 
             text="Siguiente ▶", 
@@ -158,7 +140,6 @@ class AplicacionGrafo:
         )
         self.btn_siguiente.pack(side="left", padx=4)
         
-        # Acción secundaria (Fin)
         self.btn_fin = ttk.Button(
             frame_botones, 
             text="Fin ⏭", 
@@ -183,6 +164,7 @@ class AplicacionGrafo:
 
     def crear_vista_matriz(self):
         self.frame_opciones_matriz = ttk.Frame(self.frame_matriz)
+        self.frame_opciones_matriz.pack(side="top", fill="x", pady=(0, 15))
         
         ttk.Label(self.frame_opciones_matriz, text="Tipo de Vista:", style='Titulo.TLabel').pack(side="left", padx=(0, 15))
         
@@ -192,64 +174,24 @@ class AplicacionGrafo:
         ttk.Radiobutton(self.frame_opciones_matriz, text="Matriz de adyacencia", variable=self.tipo_matriz_var, value="directos", command=self.actualizar_vista_matriz).pack(side="left", padx=(0, 10))
         ttk.Radiobutton(self.frame_opciones_matriz, text="Matriz de caminos", variable=self.tipo_matriz_var, value="accesibilidad", command=self.actualizar_vista_matriz).pack(side="left")
 
-        self.label_vacio_matriz = ttk.Label(self.frame_matriz, text="Genere un grafo para visualizar la matriz de adyacencia", font=("Helvetica", 12), foreground="#7A7A7A")
-        self.label_vacio_matriz.place(relx=0.5, rely=0.5, anchor="center")
-        
-        self.frame_tree = ttk.Frame(self.frame_matriz)
-        self.scroll_y_matriz = ttk.Scrollbar(self.frame_tree, orient="vertical")
-        self.scroll_y_matriz.pack(side="right", fill="y")
-        self.scroll_x_matriz = ttk.Scrollbar(self.frame_tree, orient="horizontal")
-        self.scroll_x_matriz.pack(side="bottom", fill="x")
-        self.tree_matriz = ttk.Treeview(self.frame_tree, show="headings", yscrollcommand=self.scroll_y_matriz.set, xscrollcommand=self.scroll_x_matriz.set)
-        self.scroll_y_matriz.config(command=self.tree_matriz.yview)
-        self.scroll_x_matriz.config(command=self.tree_matriz.xview)
-        self.tree_matriz.pack(side="left", fill="both", expand=True)
+        # Módulo Profundo de la Matriz (reemplaza tree_matriz y scrollbars manuales)
+        self.tabla_matriz = TablaMatrizModerna(self.frame_matriz)
 
     def actualizar_vista_matriz(self):
         if self.grafo_actual is None:
+            self.tabla_matriz.mostrar_estado_vacio()
             return
-            
-        if self.label_vacio_matriz.winfo_ismapped():
-            self.label_vacio_matriz.place_forget()
-            
-        self.frame_opciones_matriz.pack(side="top", fill="x", pady=(0, 10))
-        self.frame_tree.pack(fill="both", expand=True)
-        
-        for item in self.tree_matriz.get_children():
-            self.tree_matriz.delete(item)
-            
-        n = self.grafo_actual.V
-        columnas = ["Origen"] + [f"Destino {i}" for i in range(n)]
-        self.tree_matriz["columns"] = columnas
-        self.tree_matriz.heading("Origen", text="Origen \\ Destino")
-        self.tree_matriz.column("Origen", width=120, anchor="center", stretch=False)
-        
-        for i in range(n):
-            col_name = f"Destino {i}"
-            self.tree_matriz.heading(col_name, text=str(i))
-            self.tree_matriz.column(col_name, width=65, anchor="center", stretch=True)
-            
-        tipo_vista = self.tipo_matriz_var.get()
-        
-        if tipo_vista == "pesos":
-            matriz = self.grafo_actual.matriz_pesos()
-        elif tipo_vista == "directos":
-            matriz = self.grafo_actual.matriz_adyacencia_binaria()
-        else:
-            matriz = self.grafo_actual.matriz_caminos()
 
-        for i in range(n):
-            fila = [f"{i}"]
-            for j in range(n):
-                valor = matriz[i][j]
-                if tipo_vista == "pesos":
-                    if valor == 9999999:
-                        fila.append("∞") 
-                    else:
-                        fila.append(str(valor))
-                else:
-                    fila.append(str(valor))
-            self.tree_matriz.insert("", "end", values=fila)
+        tipo_vista = self.tipo_matriz_var.get()
+        matriz = self._obtener_matriz_segun_tipo(tipo_vista)
+        self.tabla_matriz.renderizar_matriz(matriz, tipo_vista)
+
+    def _obtener_matriz_segun_tipo(self, tipo_vista):
+        if tipo_vista == "pesos":
+            return self.grafo_actual.matriz_pesos()
+        if tipo_vista == "directos":
+            return self.grafo_actual.matriz_adyacencia_binaria()
+        return self.grafo_actual.matriz_caminos()
 
     def crear_controles(self):
         ttk.Label(self.frame_controles, text="Configuracion del Grafo", style='Titulo.TLabel').pack(anchor="w", pady=(0, 15))
@@ -298,33 +240,8 @@ class AplicacionGrafo:
         self.frame_texto = ttk.Frame(self.frame_controles)
         self.frame_texto.pack(fill="both", expand=True)
         
-        self.scroll_texto = ttk.Scrollbar(self.frame_texto)
-        self.scroll_texto.pack(side="right", fill="y")
-        
-        columnas = ("Paso", "Nodo", "Vecino", "Cálculo", "Decisión")
-        self.tabla_pasos = ttk.Treeview(self.frame_texto, columns=columnas, show="headings", yscrollcommand=self.scroll_texto.set, height=8)
-        self.tabla_pasos.pack(side="left", fill="both", expand=True)
-        self.scroll_texto.config(command=self.tabla_pasos.yview)
-        
-        self.tabla_pasos.heading("Paso", text="Paso")
-        self.tabla_pasos.column("Paso", width=40, anchor="center")
-        
-        self.tabla_pasos.heading("Nodo", text="Nodo")
-        self.tabla_pasos.column("Nodo", width=50, anchor="center")
-        
-        self.tabla_pasos.heading("Vecino", text="Vecino")
-        self.tabla_pasos.column("Vecino", width=50, anchor="center")
-        
-        self.tabla_pasos.heading("Cálculo", text="Cálculo")
-        self.tabla_pasos.column("Cálculo", width=120, anchor="center")
-        
-        self.tabla_pasos.heading("Decisión", text="Decisión")
-        self.tabla_pasos.column("Decisión", width=90, anchor="center")
-        
-        self.tabla_pasos.tag_configure('actualiza', foreground='#15803D')
-        self.tabla_pasos.tag_configure('descarta', foreground='#94A3B8')
-        self.tabla_pasos.tag_configure('encolada', foreground='#0F766E')
-        self.tabla_pasos.tag_configure('visita', foreground='#1E3A8A', font=('Helvetica', 9, 'bold'))
+        # Módulo Profundo de Tabla de Pasos (reemplaza el Treeview manual)
+        self.tabla_pasos = TablaPasosModerna(self.frame_texto)
 
     def evento_generar_grafo(self):
         try:
@@ -464,9 +381,8 @@ class AplicacionGrafo:
         self.renderizar_paso_actual()
 
     def limpiar_paso_a_paso(self):
-        self.tabla_pasos.delete(*self.tabla_pasos.get_children())
-        self.tabla_cola_prioridad.delete(*self.tabla_cola_prioridad.get_children())
-        self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
+        self.tabla_pasos.limpiar()
+        self.tabla_cola_prioridad.mostrar_estado_vacio()
         self.label_explicacion_paso.config(text="")
 
     def renderizar_paso_actual(self):
@@ -476,66 +392,23 @@ class AplicacionGrafo:
         paso_actual = self.grafo_actual.historial_pasos[self.paso_animacion_actual]
         self.label_explicacion_paso.config(text=paso_actual.get('mensaje', ''))
 
-        self.tabla_cola_prioridad.delete(*self.tabla_cola_prioridad.get_children())
+        # Actualización de la cola de prioridad mediante su interfaz pública
         cola_prioridad = paso_actual.get('cola_prioridad', [])
-        if cola_prioridad:
-            for costo, predecesor, nodo in cola_prioridad:
-                self.tabla_cola_prioridad.insert(
-                    "",
-                    "end",
-                    values=(costo, nodo, "-" if predecesor == -1 else predecesor)
-                )
-        else:
-            self.tabla_cola_prioridad.insert("", "end", values=("-", "Vacía", "-"))
+        self.tabla_cola_prioridad.actualizar_elementos(cola_prioridad)
         
-        # Limpiar la tabla e insertar progresivamente hasta el paso activo
-        self.tabla_pasos.delete(*self.tabla_pasos.get_children())
-        
-        ultima_fila = None
+        # Conversión de pasos acumulados usando el Patrón Strategy
+        filas_a_mostrar = []
         for i in range(self.paso_animacion_actual + 1):
-            p = self.grafo_actual.historial_pasos[i]
+            datos_paso = self.grafo_actual.historial_pasos[i]
+            evento = crear_evento_desde_diccionario(i, datos_paso)
+            estrategia = self.registro_estrategias.resolver(evento.tipo)
+            modelo_fila = estrategia.formatear(evento)
+            filas_a_mostrar.append(modelo_fila)
             
-            if p['tipo'] == 'Visitado':
-                valores = (i, p['nodo'], "-", f"Acumulado: {p['costo']}", "Visitando")
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
-                
-            elif p['tipo'] == 'Agregar a cola':
-                costo_conocido = p.get('costo_conocido', 'INF')
-                if costo_conocido == INF:
-                    costo_conocido = "INF"
-                    
-                calculo_str = (
-                    f"Arista: {p['peso_arista']}; acumulado: {p['nuevo_costo']} "
-                    f"(mejor: {costo_conocido})"
-                )
-                decision = p['decision']
-                
-                valores = (i, p['nodo_actual'], p['vecino'], calculo_str, decision)
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('encolada',))
-
-            elif p['tipo'] == 'Descartado':
-                costo_conocido = p['costo_conocido']
-                valores = (
-                    i,
-                    p['nodo_actual'],
-                    "-",
-                    f"Costo: {p['costo']} (visitado: {costo_conocido})",
-                    p['decision']
-                )
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('descarta',))
-                
-            elif p['tipo'] == 'destino_alcanzado':
-                valores = (i, p['nodo'], "-", "-", "Destino!")
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('visita',))
-
-            elif p['tipo'] == 'sin_camino':
-                valores = (i, p['nodo'], "-", "-", "Sin camino")
-                ultima_fila = self.tabla_pasos.insert("", "end", values=valores, tags=('descarta',))
-                
-        if ultima_fila:
-            self.tabla_pasos.see(ultima_fila)
+        # Renderizado en el Módulo Profundo de Pasos
+        self.tabla_pasos.renderizar_pasos(filas_a_mostrar)
             
-        # Determinar resaltados visuales del paso
+        # Determinar resaltados visuales sobre el grafo
         nodo_resaltado = None
         arista_resaltada = None
         recorrido_mostrar = []
