@@ -11,6 +11,7 @@ from tabla_pasos import TablaPasosModerna
 from estrategias_tablas import RegistroEstrategiasPaso, crear_evento_desde_diccionario
 from tabla_cola import TablaColaModerna
 from tabla_matriz import TablaMatrizModerna
+from ingreso_manual import VentanaIngresoManual, ConfiguracionModalManualDTO
 
 INF = 9999999
 
@@ -278,76 +279,31 @@ class AplicacionGrafo:
             self.abrir_ventana_manual(num_vertices)
 
     def abrir_ventana_manual(self, num_vertices):
-        ventana_manual = tk.Toplevel(self.root)
-        ventana_manual.title("Ingreso Manual")
-        ventana_manual.geometry("400x360")
-        ventana_manual.configure(bg="#FFFFFF")
-        
-        frame_interior = ttk.Frame(ventana_manual, padding="20")
-        frame_interior.pack(fill="both", expand=True)
+        config = ConfiguracionModalManualDTO(
+            ventana_padre=self.root,
+            grafo_destino=self.grafo_actual,
+            al_confirmar=self._finalizar_creacion_manual
+        )
+        VentanaIngresoManual(config)
 
-        ttk.Label(frame_interior, text="Agregar aristas al grafo", style='Titulo.TLabel').pack(pady=(0, 15))
+    def _finalizar_creacion_manual(self):
+        self.ocultar_reproduccion()
+        self.label_resultado.config(
+            text="Estado: Grafo manual generado exitosamente.",
+            style='Exito.TLabel'
+        )
+        self.limpiar_paso_a_paso()
 
-        frame_entradas = ttk.Frame(frame_interior)
-        frame_entradas.pack(fill="x", pady=(0, 15))
+        if self.label_vacio_grafo.winfo_ismapped():
+            self.label_vacio_grafo.place_forget()
 
-        ttk.Label(frame_entradas, text="Vértice 1").grid(row=0, column=0, padx=5, pady=5)
-        ttk.Label(frame_entradas, text="Vértice 2").grid(row=0, column=1, padx=5, pady=5)
-        ttk.Label(frame_entradas, text="Peso").grid(row=0, column=2, padx=5, pady=5)
-
-        entrada_vertice1 = ttk.Entry(frame_entradas, width=9, font=("Helvetica", 10))
-        entrada_vertice1.grid(row=1, column=0, padx=5)
-        entrada_vertice2 = ttk.Entry(frame_entradas, width=9, font=("Helvetica", 10))
-        entrada_vertice2.grid(row=1, column=1, padx=5)
-        entrada_peso = ttk.Entry(frame_entradas, width=9, font=("Helvetica", 10))
-        entrada_peso.grid(row=1, column=2, padx=5)
-
-        etiqueta_estado = ttk.Label(frame_interior, text=f"Vértices válidos: 0 a {num_vertices - 1}", style='Secundario.TLabel')
-        etiqueta_estado.pack(pady=(0, 10))
-
-        def agregar_arista_manual():
-            try:
-                vertice1 = int(entrada_vertice1.get())
-                vertice2 = int(entrada_vertice2.get())
-                peso = int(entrada_peso.get())
-            except ValueError:
-                messagebox.showerror("Error", "Ingrese valores enteros para ambos vértices y el peso.", parent=ventana_manual)
-                return
-
-            if not (0 <= vertice1 < num_vertices) or not (0 <= vertice2 < num_vertices):
-                messagebox.showerror("Error", f"Los vértices deben estar en el rango 0 a {num_vertices - 1}.", parent=ventana_manual)
-                return
-            if vertice1 == vertice2:
-                messagebox.showerror("Error", "Una arista debe conectar dos vértices distintos.", parent=ventana_manual)
-                return
-            if peso < 0:
-                messagebox.showerror("Error", "El peso debe ser un entero no negativo.", parent=ventana_manual)
-                return
-            if self.grafo_actual.matriz_adyacencia_ponderada[vertice1][vertice2] != 9999999:
-                messagebox.showerror("Error", "Ya existe una arista entre esos vértices.", parent=ventana_manual)
-                return
-
-            self.grafo_actual.agregar_arista(vertice1, vertice2, peso)
-            etiqueta_estado.config(text=f"Arista agregada: {vertice1} - {vertice2} (peso {peso}).")
-            entrada_vertice1.delete(0, tk.END)
-            entrada_vertice2.delete(0, tk.END)
-            entrada_peso.delete(0, tk.END)
-            entrada_vertice1.focus_set()
-
-        def guardar_grafo():
-            self.ocultar_reproduccion()
-            ventana_manual.destroy()
-            self.label_resultado.config(text="Estado: Grafo manual generado exitosamente.", style='Exito.TLabel')
-            self.limpiar_paso_a_paso()
-            
-            if self.label_vacio_grafo.winfo_ismapped():
-                self.label_vacio_grafo.place_forget()
-                
-            dibujar_en_canvas(self.ax, self.canvas_matplotlib, self.grafo_actual.aristas, self.grafo_actual.V)
-            self.actualizar_vista_matriz()
-
-        ttk.Button(frame_interior, text="Añadir arista", style='Secundario.TButton', command=agregar_arista_manual).pack(pady=(0, 10))
-        ttk.Button(frame_interior, text="Guardar grafo y visualizar", style='Primario.TButton', command=guardar_grafo).pack(pady=10)
+        dibujar_en_canvas(
+            self.ax,
+            self.canvas_matplotlib,
+            self.grafo_actual.aristas,
+            self.grafo_actual.V
+        )
+        self.actualizar_vista_matriz()
 
     def evento_calcular_camino(self):
         if self.grafo_actual is None:
