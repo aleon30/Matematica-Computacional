@@ -137,6 +137,51 @@ def configurar_estilos_tablas(estilo: ttk.Style) -> None:
         font=FUENTE_CABECERA
     )
 
+    #5
+    estilo.configure(
+        "TCombobox",
+        background=COLOR_FONDO_BASE,       # Fondo del botón de la flecha blanco unificado
+        foreground=COLOR_GRIS_800,        # Color del texto seleccionado
+        fieldbackground=COLOR_FONDO_BASE, # Fondo de la caja de texto
+        bordercolor=COLOR_GRIS_300,       # Borde sutil plano (1px)
+        darkcolor=COLOR_FONDO_BASE,       # Elimina biseles oscuros 3D
+        lightcolor=COLOR_FONDO_BASE,      # Elimina brillos 3D
+        arrowcolor=COLOR_GRIS_500,        # Flecha moderna en gris pizarra suave
+        arrowsize=11,                     # Tamaño proporcional de la flecha
+        relief="flat",
+        padding=[10, 6]                   # Espaciado interno cómodo (space-2 / space-3)
+    )
+
+    estilo.map(
+        "TCombobox",
+        fieldbackground=[
+            ("readonly", COLOR_FONDO_BASE),
+            ("disabled", COLOR_GRIS_100)
+        ],
+        background=[
+            ("active", COLOR_GRIS_100),    # Micro-hover sutil en el botón
+            ("pressed", COLOR_GRIS_200),
+            ("readonly", COLOR_FONDO_BASE)
+        ],
+        arrowcolor=[
+            ("active", COLOR_PRIMARIO_900), # La flecha se ilumina en azul marca
+            ("pressed", COLOR_PRIMARIO_900),
+            ("disabled", COLOR_GRIS_400)
+        ],
+        bordercolor=[
+            ("focus", COLOR_PRIMARIO_900),  # Anillo de foco azul al seleccionar
+            ("active", COLOR_GRIS_400)
+        ],
+        lightcolor=[
+            ("focus", COLOR_PRIMARIO_900),
+            ("active", COLOR_FONDO_BASE)
+        ],
+        darkcolor=[
+            ("focus", COLOR_PRIMARIO_900),
+            ("active", COLOR_FONDO_BASE)
+        ]
+    )
+
 
 def aplicar_etiquetas_filas(arbol: ttk.Treeview) -> None:
     """Aplica las etiquetas de alternancia de filas y estados semánticos."""
@@ -148,3 +193,16 @@ def aplicar_etiquetas_filas(arbol: ttk.Treeview) -> None:
     arbol.tag_configure("estado_descarte", foreground=COLOR_PELIGRO_TEXTO)
     arbol.tag_configure("estado_destino", foreground=COLOR_EXITO_TEXTO)
     arbol.tag_configure("estado_vacio", foreground=COLOR_GRIS_400)
+
+def configurar_estilos_desplegable_popdown(root: tk.Tk) -> None:
+    """
+    Estiliza la lista flotante de opciones (el menú desplegable que se abre)
+    para que coincida con la tipografía y colores suaves del sistema de diseño.
+    """
+    root.option_add('*TCombobox*Listbox.font', FUENTE_CELDA)
+    root.option_add('*TCombobox*Listbox.background', COLOR_FONDO_BASE)
+    root.option_add('*TCombobox*Listbox.foreground', COLOR_GRIS_800)
+    root.option_add('*TCombobox*Listbox.selectBackground', COLOR_PRIMARIO_100) # Fondo azul suave
+    root.option_add('*TCombobox*Listbox.selectForeground', COLOR_PRIMARIO_900) # Texto azul oscuro
+    root.option_add('*TCombobox*Listbox.relief', 'flat')
+    root.option_add('*TCombobox*Listbox.borderWidth', 1)

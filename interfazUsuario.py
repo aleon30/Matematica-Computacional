@@ -16,6 +16,7 @@ from ingreso_manual import (
     ConfiguracionModalManualDTO,
     ResultadoManualDTO,
 )
+from estilos_tablas import configurar_estilos_tablas, configurar_estilos_desplegable_popdown
 
 INF = 9999999
 
@@ -35,6 +36,7 @@ class AplicacionGrafo:
         self.estilo = ttk.Style()
         self.estilo.theme_use('clam')
         configurar_estilos_tablas(self.estilo)
+        configurar_estilos_desplegable_popdown(self.root)
         self.registro_estrategias = RegistroEstrategiasPaso()
 
         self.estilo.configure('TFrame', background='#FFFFFF')
