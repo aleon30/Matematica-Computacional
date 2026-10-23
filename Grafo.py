@@ -159,5 +159,3 @@ class Grafo:
                     break
         recorrido.append(inicio)
         self.recorrido_minimo = recorrido[::-1]
-
-    

@@ -1,7 +1,3 @@
-"""
-Módulo de Contratos, DTOs y Estrategias de Formateo.
-Aplica el formato numérico '#00', '#01', etc., bajo el patrón Strategy.
-"""
 from dataclasses import dataclass
 from typing import Optional, Protocol
 
@@ -22,7 +18,6 @@ class EventoPasoDTO:
 
 @dataclass(frozen=True)
 class ModeloFilaPaso:
-    """Modelo con las 5 columnas originales y el paso formateado con '#'."""
     paso_id: str
     nodo: str
     vecino: str
@@ -32,7 +27,6 @@ class ModeloFilaPaso:
 
 
 def crear_evento_desde_diccionario(indice: int, datos: dict) -> EventoPasoDTO:
-    """Convierte el diccionario de Grafo.py a un DTO inmutable."""
     nodo = datos.get('nodo_actual', datos.get('nodo', 0))
     vecino = datos.get('vecino')
     costo = datos.get('nuevo_costo', datos.get('costo', 0))

@@ -41,7 +41,7 @@ class AristaManualDTO:
 
 @dataclass(frozen=True)
 class ResultadoManualDTO:
-    """DTO emitido al confirmar la creación manual o carga de caso de estudio."""
+    """confirmar la creación manual o carga de caso de estudio."""
     grafo: Grafo
     nombres_nodos: Sequence[str]
     titulo_caso: str
@@ -49,7 +49,7 @@ class ResultadoManualDTO:
 
 @dataclass(frozen=True)
 class ConfiguracionModalManualDTO:
-    """Agrupa los parámetros de entrada del modal (cumple regla <= 3 parámetros)."""
+    """Agrupa los parámetros de entrada del modal"""
     ventana_padre: tk.Widget
     num_vertices_inicial: int
     al_confirmar: Callable[[ResultadoManualDTO], None]
@@ -138,7 +138,6 @@ class MatrizManualModel:
             titulo_caso=self.titulo_caso
         )
 
-    # Métodos privados auxiliares (CC <= 4)
     def _es_entrada_vacia_o_cero(self, texto: str) -> bool:
         if texto in ("", "∞", "-"):
             return True
@@ -227,11 +226,9 @@ class VentanaIngresoManual(tk.Toplevel):
         self._construir_encabezado(self._marco_principal)
         self._construir_barra_herramientas(self._marco_principal)
 
-        # 2. IMPORTANTE: Empaquetar el pie con side=BOTTOM ANTES del contenedor expandible
-        # para garantizar que el botón "Guardar" nunca sea empujado fuera de la ventana.
         self._construir_pie_acciones(self._marco_principal)
 
-        # 3. Contenedor central desplazable (ocupa el espacio restante)
+        # 2. Contenedor central desplazable (ocupa el espacio restante)
         self._construir_area_desplazable(self._marco_principal)
         self._reconstruir_cuadricula_visual()
         self._actualizar_resumen_estado()

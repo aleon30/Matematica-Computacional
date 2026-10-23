@@ -69,7 +69,7 @@ def configurar_estilos_tablas(estilo: ttk.Style) -> None:
         foreground=[("active", COLOR_GRIS_700)]
     )
 
-    # 3. Barras de desplazamiento modernas (elimina la barra mostaza antigua)
+    # 3. Barras de desplazamiento modernas
     estilo.configure(
         "TScrollbar",
         background=COLOR_GRIS_300,
@@ -121,7 +121,7 @@ def configurar_estilos_tablas(estilo: ttk.Style) -> None:
         arrowcolor=[("pressed", COLOR_GRIS_800), ("active", COLOR_GRIS_700)]
     )
 
-    # 4. Marcos contenedores (elimina el borde mostaza de LabelFrame)
+    # 4. Marcos contenedores
     estilo.configure(
         "TLabelframe",
         background=COLOR_FONDO_BASE,

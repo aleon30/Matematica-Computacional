@@ -15,7 +15,7 @@ class IEstrategiaMatriz(Protocol):
 class EstrategiaMatrizPesos(IEstrategiaMatriz):
     """Estrategia para la matriz de pesos ponderada."""
     def obtener_alineacion(self) -> str:
-        # Números alineados a la derecha según Refactoring UI
+        # Números alineados a la derecha
         return tk.E
 
     def formatear_valor(self, fila: int, columna: int, valor: int) -> str:
@@ -52,7 +52,7 @@ class TablaMatrizModerna(ttk.Frame):
     """
     Componente modular profundo para visualizar representaciones matriciales del grafo.
     Encapsula barras de desplazamiento bidireccionales, configuración dinámica de columnas
-    y formateo de celdas sin exponer complejidad interna.
+    y formateo de celdas.
     """
 
     def __init__(self, contenedor_padre: tk.Widget) -> None:
@@ -126,7 +126,7 @@ class TablaMatrizModerna(ttk.Frame):
         nombres_columnas = ["origen"] + [f"dest_{i}" for i in range(total_vertices)]
         self._arbol["columns"] = nombres_columnas
 
-        # Columna de Origen (Índice visual destacado)
+        # Columna de Origen
         self._arbol.heading("origen", text="ORIGEN \\ DESTINO", anchor=tk.CENTER)
         self._arbol.column("origen", width=120, anchor=tk.CENTER, stretch=False)
 
