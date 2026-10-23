@@ -1,4 +1,5 @@
 from tkinter import ttk
+import tkinter as tk
 
 COLOR_FONDO_BASE = "#FFFFFF"       # Blanco puro de celda
 COLOR_GRIS_100   = "#F8FAFC"       # Fondo alternado de fila y pista de scrollbar

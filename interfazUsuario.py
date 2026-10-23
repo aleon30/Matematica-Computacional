@@ -6,7 +6,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Grafo import Grafo
 from dibujarGrafo import dibujar_en_canvas
-from estilos_tablas import configurar_estilos_tablas
 from tabla_pasos import TablaPasosModerna
 from estrategias_tablas import RegistroEstrategiasPaso, crear_evento_desde_diccionario
 from tabla_cola import TablaColaModerna
@@ -17,6 +16,7 @@ from ingreso_manual import (
     ResultadoManualDTO,
 )
 from estilos_tablas import configurar_estilos_tablas, configurar_estilos_desplegable_popdown
+from typing import Optional
 
 INF = 9999999
 

@@ -162,14 +162,17 @@ class MatrizManualModel:
         return None
 
     def _procesar_item_conexion(self, item: dict) -> bool:
-        u = item.get("origen")
-        v = item.get("destino")
-        peso = item.get("peso")
-        if not all(isinstance(x, int) for x in (u, v, peso)):
-            return False
-        if not (0 <= u < self.num_vertices and 0 <= v < self.num_vertices):
-            return False
-        return self.intentar_asignar_peso(CoordenadaCeldaDTO(u, v), str(peso))
+     if not isinstance(item, dict):
+        return False
+     u = item.get("origen")
+     v = item.get("destino")
+     peso = item.get("peso")
+     # En Python bool es subclase de int; se excluyen booleanos explícitamente
+     if not all(isinstance(x, int) and not isinstance(x, bool) for x in (u, v, peso)):
+        return False
+     if u == v or not (0 <= u < self.num_vertices and 0 <= v < self.num_vertices):
+        return False
+     return self.intentar_asignar_peso(CoordenadaCeldaDTO(u, v), str(peso))
 
     def _recolectar_aristas_de_fila(self, fila: int, acumulador: list[AristaManualDTO]) -> None:
         for col in range(fila + 1, self.num_vertices):
@@ -469,17 +472,6 @@ class VentanaIngresoManual(tk.Toplevel):
         celda_espejo.insert(0, texto)
         self._sincronizando = False
 
-    def _reflejar_en_celda_espejo(self, coord: CoordenadaCeldaDTO) -> None:
-        coord_espejo = CoordenadaCeldaDTO(coord.columna, coord.fila)
-        celda_espejo = self._celdas_ui[(coord_espejo.fila, coord_espejo.columna)]
-        peso = self._modelo.obtener_peso(coord)
-        texto_espejo = str(peso) if peso > 0 else ""
-
-        self._sincronizando = True
-        celda_espejo.delete(0, tk.END)
-        celda_espejo.insert(0, texto_espejo)
-        self._marcar_estado_celda(coord_espejo, tiene_error=False)
-        self._sincronizando = False
 
     def _marcar_estado_celda(self, coord: CoordenadaCeldaDTO, tiene_error: bool) -> None:
         llave = (coord.fila, coord.columna)
