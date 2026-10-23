@@ -1,0 +1,25 @@
+{
+  "empresa": "Red Logística Lima - Chancay",
+  "cantidadVertices": 7,
+  "nombresNodos": [
+    "Puerto Chancay",
+    "Hub Ancón",
+    "Almacén Callao",
+    "Planta Ate",
+    "CD Villa El Salvador",
+    "Sede Lurín",
+    "Terminal Santa Anita"
+  ],
+  "conexiones": [
+    { "origen": 0, "destino": 1, "peso": 18 },
+    { "origen": 0, "destino": 2, "peso": 42 },
+    { "origen": 1, "destino": 2, "peso": 22 },
+    { "origen": 1, "destino": 6, "peso": 35 },
+    { "origen": 2, "destino": 3, "peso": 28 },
+    { "origen": 2, "destino": 4, "peso": 38 },
+    { "origen": 3, "destino": 6, "peso": 12 },
+    { "origen": 3, "destino": 5, "peso": 30 },
+    { "origen": 4, "destino": 5, "peso": 14 },
+    { "origen": 5, "destino": 6, "peso": 26 }
+  ]
+}

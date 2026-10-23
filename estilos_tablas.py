@@ -1,12 +1,4 @@
-"""
-Módulo de Tokens y Configuración de Estilo Base para Tablas (Fase 1 - Completo).
-Aplica la paleta HSL cerrada y estiliza tablas, barras y contenedores según Refactoring UI.
-"""
 from tkinter import ttk
-
-# -------------------------------------------------------------------------
-# Catálogo de Colores Cerrado (REGLAS_PROYECTO.md - HSL a Hex)
-# -------------------------------------------------------------------------
 
 COLOR_FONDO_BASE = "#FFFFFF"       # Blanco puro de celda
 COLOR_GRIS_100   = "#F8FAFC"       # Fondo alternado de fila y pista de scrollbar
