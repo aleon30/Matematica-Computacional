@@ -105,6 +105,7 @@ class Grafo:
                 self.historial_pasos.append({
                     'tipo': 'destino_alcanzado',
                     'nodo': actual,
+                    'costo': peso,
                     'cola_prioridad': sorted(cola),
                     'mensaje': f"¡Nodo destino {fin} alcanzado!"
                 })

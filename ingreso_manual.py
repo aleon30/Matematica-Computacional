@@ -84,6 +84,7 @@ class MatrizManualModel:
 
         peso = self._convertir_a_entero_positivo(texto_limpio)
         if peso is None:
+            # Si el valor es inválido, neutraliza el peso en el modelo para no retener datos sucios
             self._establecer_par_simetrico(coord, 0)
             return False
 
@@ -139,9 +140,11 @@ class MatrizManualModel:
 
     # Métodos privados auxiliares (CC <= 4)
     def _es_entrada_vacia_o_cero(self, texto: str) -> bool:
-        if texto in ("", "∞"):
+        if texto in ("", "∞", "-"):
             return True
-        return texto.isdigit() and int(texto) == 0
+        if texto.isdigit():
+            return int(texto) == 0
+        return False
 
     def _cargar_nombres_personalizados(self, lista_nombres: list) -> None:
         if not isinstance(lista_nombres, list):
@@ -438,26 +441,33 @@ class VentanaIngresoManual(tk.Toplevel):
         )
         celda_fija.grid(row=coord.fila + 1, column=coord.columna + 1, padx=2, pady=2, ipady=3)
 
-    # -------------------------------------------------------------------------
-    # Manejadores de Eventos con Guardia Antirretorno (CC <= 4)
-    # -------------------------------------------------------------------------
+    # Manejadores de Eventos con Guardia Antirretorno
 
     def _al_editar_celda(self, coord: CoordenadaCeldaDTO) -> None:
         if self._sincronizando:
             return
 
         celda_origen = self._celdas_ui[(coord.fila, coord.columna)]
-        es_valido = self._modelo.intentar_asignar_peso(coord, celda_origen.get())
+        texto_actual = celda_origen.get().strip()
+        es_valido = self._modelo.intentar_asignar_peso(coord, texto_actual)
 
-        if not es_valido:
-            self._marcar_estado_celda(coord, tiene_error=True)
-            self._reflejar_en_celda_espejo(coord)
-            self._actualizar_resumen_estado()
-            return
-
-        self._marcar_estado_celda(coord, tiene_error=False)
-        self._reflejar_en_celda_espejo(coord)
+        coord_espejo = CoordenadaCeldaDTO(coord.columna, coord.fila)
+        
+        # Mantiene la simetría exacta tanto en valores como en estados de error visual
+        self._marcar_estado_par_celdas(coord, coord_espejo, tiene_error=not es_valido)
+        self._sincronizar_texto_espejo(coord_espejo, texto_actual)
         self._actualizar_resumen_estado()
+
+    def _marcar_estado_par_celdas(self, c1: CoordenadaCeldaDTO, c2: CoordenadaCeldaDTO, tiene_error: bool) -> None:
+        self._marcar_estado_celda(c1, tiene_error)
+        self._marcar_estado_celda(c2, tiene_error)
+
+    def _sincronizar_texto_espejo(self, coord_espejo: CoordenadaCeldaDTO, texto: str) -> None:
+        celda_espejo = self._celdas_ui[(coord_espejo.fila, coord_espejo.columna)]
+        self._sincronizando = True
+        celda_espejo.delete(0, tk.END)
+        celda_espejo.insert(0, texto)
+        self._sincronizando = False
 
     def _reflejar_en_celda_espejo(self, coord: CoordenadaCeldaDTO) -> None:
         coord_espejo = CoordenadaCeldaDTO(coord.columna, coord.fila)
