@@ -333,36 +333,58 @@ class AplicacionGrafo:
         self.actualizar_vista_matriz()
 
     def evento_calcular_camino(self):
+        """Orquesta la validación, ejecución algorítmica y renderizado visual (CC = 3)."""
         if self.grafo_actual is None:
             messagebox.showerror("Error", "Primero debe generar un grafo.")
             return
 
-        try:
-            inicio = self._extraer_indice_nodo(self.entry_inicio.get())
-            fin = self._extraer_indice_nodo(self.entry_destino.get())
-            num_vertices = self.grafo_actual.V
+        par_nodos = self._validar_seleccion_nodos()
+        if par_nodos is None:
+            return  # Guardia temprana: error ya notificado al usuario
 
-            if not (0 <= inicio < num_vertices) or not (0 <= fin < num_vertices):
-                messagebox.showerror("Error", f"Los nodos ingresados no existen. Rango valido: 0 a {num_vertices - 1}.")
-                return
-        except ValueError:
-            messagebox.showerror("Error", "Seleccione un nodo válido o ingrese su número entero.")
-            return
-
+        inicio, fin = par_nodos
         self.grafo_actual.camino_minimo(inicio, fin)
 
         self.paso_animacion_actual = 0
         self.mostrar_reproduccion()
-
-        if self.grafo_actual.recorrido_minimo == [-1]:
-            texto_res = "Resultado: No existe un camino posible."
-            self.label_resultado.config(text=texto_res, foreground="#0A0A0A")
-        else:
-            ruta_formateada = self._formatear_ruta_con_nombres(self.grafo_actual.recorrido_minimo)
-            texto_res = f"Ruta: {ruta_formateada}\nCosto Total: {self.grafo_actual.costo_total}"
-            self.label_resultado.config(text=texto_res, style='Exito.TLabel')
-
+        self._mostrar_resultado_calculo()
         self.renderizar_paso_actual()
+
+    def _mostrar_resultado_calculo(self) -> None:
+        if self.grafo_actual.recorrido_minimo == [-1]:
+            self.label_resultado.config(
+                text="Resultado: No existe un camino posible entre los nodos seleccionados.",
+                foreground="#0A0A0A"
+            )
+            return
+
+        ruta_formateada = self._formatear_ruta_con_nombres(self.grafo_actual.recorrido_minimo)
+        texto_exito = f"Ruta: {ruta_formateada}\nCosto Total: {self.grafo_actual.costo_total}"
+        self.label_resultado.config(text=texto_exito, style='Exito.TLabel')
+
+    def _validar_seleccion_nodos(self) -> Optional[tuple[int, int]]:
+        """Valida que los nodos existan y que inicio != fin (CC = 4)."""
+        try:
+            inicio = self._extraer_indice_nodo(self.entry_inicio.get())
+            fin = self._extraer_indice_nodo(self.entry_destino.get())
+        except ValueError:
+            messagebox.showerror("Entrada inválida", "Seleccione un nodo de la lista o ingrese un número entero.")
+            return None
+
+        num_vertices = self.grafo_actual.V
+        if not (0 <= inicio < num_vertices and 0 <= fin < num_vertices):
+            messagebox.showerror("Rango inválido", f"Los nodos deben estar entre 0 y {num_vertices - 1}.")
+            return None
+
+        if inicio == fin:
+            messagebox.showwarning(
+                "Nodos idénticos",
+                f"El nodo de inicio y destino no pueden ser el mismo (Nodo [{inicio}]).\n"
+                "Seleccione dos vértices diferentes para calcular una ruta."
+            )
+            return None
+
+        return (inicio, fin)
 
     def _formatear_ruta_con_nombres(self, recorrido):
         if not self.nombres_nodos_actuales:
