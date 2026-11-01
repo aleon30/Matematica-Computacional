@@ -376,9 +376,8 @@ class VentanaIngresoManual(tk.Toplevel):
             font=FUENTE_CABECERA,
             bg=COLOR_GRIS_100,
             fg=COLOR_GRIS_500,
-            width=14,
             anchor="e"
-        ).grid(row=0, column=0, padx=4, pady=(0, 6))
+        ).grid(row=0, column=0, padx=(4, 8), pady=(0, 6), sticky="e")
 
         for col in range(self._modelo.num_vertices):
             tk.Label(
@@ -387,12 +386,12 @@ class VentanaIngresoManual(tk.Toplevel):
                 font=FUENTE_CABECERA,
                 bg=COLOR_GRIS_100,
                 fg=COLOR_GRIS_700,
-                width=5
+                width=6
             ).grid(row=0, column=col + 1, padx=2, pady=(0, 6))
 
     def _renderizar_fila_matriz(self, contenedor: tk.Frame, fila: int) -> None:
-        nombre_corto = self._modelo.nombres_nodos[fila][:12]
-        etiqueta_fila = f"[{fila}] {nombre_corto}" if nombre_corto != f"Nodo {fila}" else f"Nodo [{fila}]"
+        nombre = self._modelo.nombres_nodos[fila]
+        etiqueta_fila = f"[{fila}] {nombre}" if nombre != f"Nodo {fila}" else f"Nodo [{fila}]"
 
         tk.Label(
             contenedor,
@@ -400,9 +399,8 @@ class VentanaIngresoManual(tk.Toplevel):
             font=FUENTE_CABECERA,
             bg=COLOR_GRIS_100,
             fg=COLOR_GRIS_700,
-            width=14,
             anchor="e"
-        ).grid(row=fila + 1, column=0, padx=(0, 8), pady=2)
+        ).grid(row=fila + 1, column=0, padx=(4, 10), pady=2, sticky="e")
 
         for col in range(self._modelo.num_vertices):
             self._crear_celda_individual(contenedor, CoordenadaCeldaDTO(fila, col))
