@@ -1,6 +1,6 @@
 # Matemática Computacional 💻 - TB1
 
-<img src="assets/logo.jpg" alt="Logo del proyecto" width="180">
+<img src="assets/logo.jpg" alt="Logo del proyecto">
 
 ## 👥 Integrantes
 
