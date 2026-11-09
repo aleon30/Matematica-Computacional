@@ -1,0 +1,23 @@
+{
+  "empresa": "Transporexa - Red de Distribución Regional",
+  "cantidadVertices": 6,
+  "nombresNodos": [
+    "Centro de distribución principal",
+    "Deposito Zona 1",
+    "Deposito Zona 2",
+    "Deposito Zona 3",
+    "Deposito Zona 4",
+    "Punto de entrega final"
+  ],
+  "conexiones": [
+    { "origen": 0, "destino": 1, "peso": 12 },
+    { "origen": 0, "destino": 2, "peso": 8 },
+    { "origen": 1, "destino": 2, "peso": 3 },
+    { "origen": 1, "destino": 3, "peso": 15 },
+    { "origen": 2, "destino": 3, "peso": 6 },
+    { "origen": 2, "destino": 4, "peso": 10 },
+    { "origen": 3, "destino": 4, "peso": 4 },
+    { "origen": 3, "destino": 5, "peso": 7 },
+    { "origen": 4, "destino": 5, "peso": 5 }
+  ]
+}
